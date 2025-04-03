@@ -3,6 +3,7 @@ import { Outlet, useLocation } from "react-router"
 import Header from "./Header"
 
 import { initFlyonUI } from '../global';
+import NavBar from "./Navbar";
 
 export default function Layout() {
     const location = useLocation();
@@ -25,11 +26,12 @@ export default function Layout() {
 
     return (
         <>
-            <h1 class="text-3xl font-bold underline">
-                Hello world!
-            </h1>
             <Header />
-            <Outlet />
+            <NavBar />
+            <div class="ml-68 mt-4 max-sm:ml-10">
+                <Outlet />
+            </div>
+
         </>
     )
 }
