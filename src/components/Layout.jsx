@@ -28,7 +28,7 @@ export default function Layout() {
         <>
             <Header />
             <NavBar />
-            <div class="ml-68 mt-4 max-sm:ml-10">
+            <div class="ml-68 mr-4 mt-4 max-sm:ml-10 ">
                 <Outlet />
             </div>
 

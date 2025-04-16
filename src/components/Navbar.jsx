@@ -28,6 +28,28 @@ export default function NavBar() {
                         </NavLink>
                     </li>
                     <li>
+                        <NavLink
+                            to="/hoc-phan"
+                            className={({ isActive }) =>
+                                isActive ? "bg-blue-200" : ""
+                            }
+                        >
+                            <span className="icon-[tabler--home] size-5"></span>
+                            Học phần
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink
+                            to="/de-cuong-chi-tiet"
+                            className={({ isActive }) =>
+                                isActive ? "bg-blue-200" : ""
+                            }
+                        >
+                            <span className="icon-[tabler--home] size-5"></span>
+                            Đề cương chi tiết
+                        </NavLink>
+                    </li>
+                    <li>
                         <a href="#">
                             <span className="icon-[tabler--user] size-5"></span>
                             User
