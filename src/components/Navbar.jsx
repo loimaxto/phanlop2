@@ -7,24 +7,13 @@ export default function NavBar() {
                 <ul className="menu">
                     <li>
                         <NavLink
-                            to="/"
-                            className={({ isActive, isPending }) =>
-                                isPending ? "pending" : isActive ? "active" : ""
+                            to="/ctdt"
+                            className={({ isActive }) =>
+                                isActive ? "bg-blue-200" : ""
                             }
                         >
                             <span className="icon-[tabler--home] size-5"></span>
-                            Home
-                        </NavLink>
-                    </li>
-                    <li>
-                        <NavLink
-                            to="/about"
-                            className={({ isActive, isPending }) =>
-                                isPending ? "pending" : isActive ? "active" : ""
-                            }
-                        >
-                            <span className="icon-[tabler--home] size-5"></span>
-                            About
+                            Chương trình đào tạo
                         </NavLink>
                     </li>
                     <li>
