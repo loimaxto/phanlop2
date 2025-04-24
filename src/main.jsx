@@ -9,6 +9,7 @@ import DeCuongPage from "./pages/DeCuongChiTiet/DeCuongPage";
 import CurriculumPage from "./pages/ChuongTrinhDaoTao/CurriculumPage";
 import CreateCurriculumPage from "./pages/ChuongTrinhDaoTao/CreateCurriculumPage";
 import KeHoachDayHocPage from "./pages/KeHoachDayHoc/KeHoachDayHocPage";
+import KeHoachGiangDayPage from "./pages/KeHoachGiangDay/KeHoachGiangDayPage";
 
 const root = document.getElementById("root");
 
@@ -25,6 +26,10 @@ ReactDOM.createRoot(root).render(
                 <Route
                     path="/ke-hoach-day-hoc"
                     element={<KeHoachDayHocPage />}
+                />
+                <Route
+                    path="/ke-hoach-giang-day"
+                    element={<KeHoachGiangDayPage />}
                 />
             </Route>
         </Routes>
