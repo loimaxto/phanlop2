@@ -6,8 +6,8 @@ import Home from './pages/Home';
 import Layout from './components/Layout';
 import HocPhanPage from './pages/HocPhan/HocPhanPage';
 import DeCuongPage from './pages/DeCuongChiTiet/DeCuongPage';
-import CurriculumPage from './pages/ChuongTrinhDaoTao/CurriculumPage';
-import CreateCurriculumPage from './pages/ChuongTrinhDaoTao/CreateCurriculumPage';
+import CurriculumPage from './pages/ChuongTrinhDaoTao';
+import CreateCurriculumPage from './pages/ChuongTrinhDaoTao';
 import KeHoachDayHocPage from './pages/KeHoachDayHoc/KeHoachDayHocPage';
 import KeHoachGiangDayPage from './pages/KeHoachGiangDay/KeHoachGiangDayPage';
 
