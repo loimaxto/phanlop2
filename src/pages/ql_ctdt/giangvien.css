@@ -1,0 +1,201 @@
+/* Container chính */
+#container_gv {
+    border: 1px solid black;
+    background: #e0ffe0;
+    width: 800px;
+    height: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  
+  /* Phần header chứa các nút */
+
+  #header_gv {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-radius: 8px;
+  }
+  
+  #header_gv_left {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* khoảng cách giữa các nút */
+    width: 50%;
+  }
+  
+  #header_gv_left .btn {
+    flex: 1 1 calc(50% - 10px); 
+    min-width: 100px;
+    padding: 6px;
+    text-align: center;
+  }
+
+  #header_gv_right select{
+    border-radius: 10px;
+    text-align: center;
+    width: 170px;
+    height: 30px;
+    margin-top: 10px;
+    margin-right: 60px;
+    float: right;
+  }
+
+  #header_gv_right {
+    padding: 10px;
+    width: 50%;
+}
+#header_gv_right input {
+    width: 300px;
+    height: 26px;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    font-size: 14px;
+    transition: 0.3s;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+  }
+  
+  #header_gv_right input:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+  }
+
+  /* Nút chung */
+  .btn {
+    padding: 8px 16px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  
+  #them_gv {
+    background: #2ecc71;
+  }
+  
+  #import_gv {
+    background: #6d2ecc;
+  }
+  
+  #export_gv {
+    background: #444;
+  }
+
+  #sua_gv {
+    background: #0b1eaf;
+  }
+
+  #content_gv {
+    margin-top: 30px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .bang_gv{
+    border: 1px solid black;
+    height: 400px;
+  }
+
+  .bang_gv table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .bang_gv table tbody tr:hover {
+    background: #d0cfcf;
+  }
+  
+  .bang_gv table th, .bang_gv td {
+    border: 1px solid #444;
+    padding: 8px;
+    text-align: center;
+    vertical-align: middle;
+  }
+  
+  .bang_gv table thead th {
+    background-color: #f0f0f0;
+  }
+  
+  .bang_gv table tbody tr  {
+    background: #fff;
+    cursor: pointer;
+  }
+
+  
+h2 {
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 17px;
+  }
+  
+
+  .scroll-container {
+    overflow: auto;     
+    height: 400px;
+  }
+  
+  /* form chi tiết */
+#container_chitiet{
+    display: none;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    position: absolute;
+    top: 0; 
+}
+
+#form_chitiet{
+    margin-left: 26%;
+    margin-top: 100px;
+    height: auto;
+    border-radius: 10px;
+    width: 800px;
+    background:#f0f2f0;
+    padding: 10px; 
+}
+
+#form_chitiet h2{
+    font-size: 40px;
+    color:#444;
+}
+
+#form_chitiet button{
+    background: none;
+    border: none;
+    position:relative;
+    top: 10px;
+    left: 10px;
+    font-size: 30px;
+    cursor: pointer;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+
+  .table_chitiet {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  .table_chitiet th, .table_chitiet td {
+    border: 2px solid #444;
+    padding: 8px;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+
+  #name_gv_ct{
+    position: relative;
+    top: 25px;
+    left: 20px;
+    font-size: 20px;
+  }
+
+ 
