@@ -50,6 +50,15 @@ export default function NavBar() {
             </NavLink>
           </li>
           <li>
+            <NavLink
+              to="/giang-vien"
+              className={({ isActive }) => (isActive ? 'bg-blue-200' : '')}
+            >
+              <span className="icon-[tabler--home] size-5"></span>
+              Giảng viên
+            </NavLink>
+          </li>
+          <li>
             <a href="#">
               <span className="icon-[tabler--user] size-5"></span>
               User

@@ -10,6 +10,7 @@ import CurriculumPage from './pages/ChuongTrinhDaoTao/CurriculumPage';
 import CreateCurriculumPage from './pages/ChuongTrinhDaoTao/CreateCurriculumPage';
 import KeHoachDayHocPage from './pages/KeHoachDayHoc/KeHoachDayHocPage';
 import KeHoachGiangDayPage from './pages/KeHoachGiangDay/KeHoachGiangDayPage';
+import GiangVienPage from './pages/GiangVien/GiangVienPage';
 
 const root = document.getElementById('root');
 
@@ -25,6 +26,7 @@ ReactDOM.createRoot(root).render(
         <Route path="/create-ctdt" element={<CreateCurriculumPage />} />
         <Route path="/ke-hoach-day-hoc/:nganhId" element={<KeHoachDayHocPage />} />
         <Route path="/ke-hoach-giang-day" element={<KeHoachGiangDayPage />} />
+        <Route path="/giang-vien" element={<GiangVienPage />} />
       </Route>
     </Routes>
   </BrowserRouter>

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { nganhData } from '../dumpData';
 
-import { API_URL } from '../config/apiConfig';
+import API_URL from '/src/config/apiConfig.js';
 
 export const getNganhById = async id => {
   try {
