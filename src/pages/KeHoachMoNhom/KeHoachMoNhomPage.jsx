@@ -1,46 +1,55 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { keHoachGiangDayData, phanCongGiangDayData } from '../../dumpData';
-import AddKeHoachModal from './AddKeHoachModal';
-import EditKeHoachModal from './EditKeHoachModal';
-import AddPhanCongModal from './AddPhanCongModal';
-import EditPhanCongModal from './EditPhanCongModal';
+import { keHoachMoNhomData, phanCongGiangDayData } from '../../dumpData';
+// import AddKeHoachModal from './AddKeHoachModal';
+// import EditKeHoachModal from './EditKeHoachModal';
+// import AddPhanCongModal from './AddPhanCongModal';
+// import EditPhanCongModal from './EditPhanCongModal';
+import KeHoachMoNhomService from '../../services/KeHoachMoNhomService';
+import { NavLink } from 'react-router';
 
 const KeHoachGiangDayPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPhanCong, setSelectedPhanCong] = useState(null);
   const [selectedKeHoach, setSelectedKeHoach] = useState(null);
   const [modalMode, setModalMode] = useState('add'); // add, edit, addPhanCong, editPhanCong
-  const [selectedHocKy, setSelectedHocKy] = useState('1');
+  // const [selectedHocKy, setSelectedHocKy] = useState('1');
   const [selectedNamHoc, setSelectedNamHoc] = useState('');
   const [needRefresh, setNeedRefresh] = useState(true);
   // Dữ liệu mẫu cho kế hoạch giảng dạy
-  const [keHoachData, setKeHoachData] = useState(keHoachGiangDayData);
+  const [keHoachData, setKeHoachData] = useState(keHoachMoNhomData);
 
   // khoi tao combobox năm học
   useEffect(() => {
     const currentYear = new Date().getFullYear();
-    setSelectedNamHoc(currentYear);
+    setSelectedNamHoc(currentYear - 1);
   }, []);
 
   // Lấy dữ liệu kế hoạch giảng dạy từ dumpData.js
   // Fake backend
   useEffect(() => {
     if (needRefresh) {
-      keHoachGiangDayData;
+      keHoachMoNhomData;
       setNeedRefresh(false);
-      setKeHoachData(keHoachGiangDayData);
+      setKeHoachData(keHoachMoNhomData);
     }
   }, [needRefresh]);
 
-  //Fake backend
   useEffect(() => {
-    let newKeHoachData = keHoachGiangDayData.filter(keHoach => {
-      return keHoach.hocKy == selectedHocKy && keHoach.namHoc == selectedNamHoc;
-    });
-    setKeHoachData(newKeHoachData);
-  }, [selectedHocKy, selectedNamHoc]);
+    // let newKeHoachData = keHoachMoNhomData.filter(keHoach => {
+    //   return keHoach.namHoc.split('-')[0] == selectedNamHoc;
+    // });
+    (async () => {
+      let data = await KeHoachMoNhomService.getAll();
+      console.log('data', data);
+      setKeHoachData(
+        data.filter(keHoach => {
+          return keHoach.namHoc.split('-')[0] == selectedNamHoc;
+        })
+      );
+    })();
+  }, [selectedNamHoc]);
 
   const openAddKeHoachModal = () => {
     setModalMode('add');
@@ -63,13 +72,15 @@ const KeHoachGiangDayPage = () => {
   const handleDeletePhanCong = (keHoachId, phanCongId) => {
     ({ keHoachId, phanCongId });
     if (window.confirm('Bạn có chắc chắn muốn xóa phân công này?')) {
-      let keHoachData = keHoachGiangDayData.find(item => item.id == keHoachId);
+      let keHoachData = keHoachMoNhomData.find(item => item.id == keHoachId);
       if (keHoachData) {
-        let keHoachPhanCongIndex = keHoachData.phanCong.findIndex(item => item.id == phanCongId);
+        let keHoachPhanCongIndex = keHoachData.phanCongGiangDay.findIndex(
+          item => item.id == phanCongId
+        );
         let phanCongIndex = phanCongGiangDayData.findIndex(item => item.id == phanCongId);
         phanCongGiangDayData.find(item => item.id == phanCongId);
         if (keHoachPhanCongIndex !== -1 && phanCongIndex !== -1) {
-          keHoachData.phanCong.splice(keHoachPhanCongIndex, 1);
+          keHoachData.phanCongGiangDay.splice(keHoachPhanCongIndex, 1);
           phanCongGiangDayData.splice(phanCongIndex, 1);
           setNeedRefresh(true);
         }
@@ -94,18 +105,6 @@ const KeHoachGiangDayPage = () => {
           <h1 className="text-2xl font-bold">Kế hoạch mở nhóm & Phân công giảng dạy</h1>
           <div className="flex space-x-4">
             <div className="flex items-center space-x-2">
-              <label className="font-medium">Học kỳ:</label>
-              <select
-                value={selectedHocKy}
-                onChange={e => setSelectedHocKy(e.target.value)}
-                className="border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="1">HK1</option>
-                <option value="2">HK2</option>
-                <option value="3">HK3</option>
-              </select>
-            </div>
-            <div className="flex items-center space-x-2">
               <label className="font-medium">Năm học:</label>
               <select
                 value={selectedNamHoc}
@@ -119,8 +118,9 @@ const KeHoachGiangDayPage = () => {
                 ))}
               </select>
             </div>
-            <button
-              onClick={openAddKeHoachModal}
+            <NavLink
+              to="/ke-hoach-mo-nhom/create"
+              // onClick={openAddKeHoachModal}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center transition-colors duration-200"
             >
               <svg
@@ -136,7 +136,7 @@ const KeHoachGiangDayPage = () => {
                 />
               </svg>
               Thêm kế hoạch
-            </button>
+            </NavLink>
           </div>
         </div>
 
@@ -199,7 +199,7 @@ const KeHoachGiangDayPage = () => {
             </thead>
             <tbody>
               {keHoachData.map((keHoach, keHoachIndex) => {
-                const rowSpan = keHoach.phanCong.length || 1;
+                const rowSpan = keHoach.phanCongGiangDay.length || 1;
                 return (
                   <React.Fragment key={keHoach.id}>
                     <tr>
@@ -268,8 +268,8 @@ const KeHoachGiangDayPage = () => {
                         </div>
                       </td>
                     </tr>
-                    {keHoach.phanCong.length > 0 ? (
-                      keHoach.phanCong.map((phanCong, phanCongIndex) => (
+                    {keHoach.phanCongGiangDay.length > 0 ? (
+                      keHoach.phanCongGiangDay.map((phanCong, phanCongIndex) => (
                         <tr key={`${keHoach.id}-${phanCongIndex}`} className="hover:bg-gray-50">
                           {phanCongIndex === 0 && (
                             <>
@@ -277,7 +277,7 @@ const KeHoachGiangDayPage = () => {
                                 {keHoachIndex + 1}
                               </td>
                               <td className="p-2 border" rowSpan={rowSpan}>
-                                {keHoach.hocPhan.maHP}
+                                {keHoach.hocPhan.maHocPhan}
                               </td>
                               <td className="p-2 border" rowSpan={rowSpan}>
                                 {keHoach.hocPhan.tenHocPhan}
@@ -292,28 +292,28 @@ const KeHoachGiangDayPage = () => {
                                 {keHoach.hocPhan.soTietLyThuyet}
                               </td>
                               <td className="p-2 border text-center" rowSpan={rowSpan}>
-                                {keHoach.hocPhan.soTietThucTap}
+                                {keHoach.hocPhan.soTietBaiTap}
                               </td>
                               <td className="p-2 border text-center" rowSpan={rowSpan}>
                                 {keHoach.hocPhan.soTietThucHanh}
                               </td>
                               <td className="p-2 border text-center" rowSpan={rowSpan}>
-                                {keHoach.hocPhan.soTietTong}
+                                {keHoach.hocPhan.soTietTongCong}
                               </td>
                               <td className="p-2 border text-center" rowSpan={rowSpan}>
-                                {keHoach.heSoHP.toFixed(2)}
+                                {keHoach.heSo.toFixed(2)}
                               </td>
                               <td className="p-2 border text-center" rowSpan={rowSpan}>
                                 {keHoach.tongSoNhom}
                               </td>
                               <td className="p-2 border text-center" rowSpan={rowSpan}>
-                                {keHoach.slsvNhom}
+                                {keHoach.soSinhVien1Nhom}
                               </td>
                             </>
                           )}
                           <td className="p-2 border text-center">{phanCong.nhom}</td>
-                          <td className="p-2 border text-center">{phanCong.maCBGD}</td>
-                          <td className="p-2 border">{phanCong.tenCBGD}</td>
+                          <td className="p-2 border text-center">{phanCong.giangVien.id}</td>
+                          <td className="p-2 border">{phanCong.giangVien.ten}</td>
                           <td className="p-2 border text-center">{phanCong.soTietThucHien}</td>
                           <td className="p-2 border text-center">{phanCong.soTietThucTe}</td>
                           <td className="p-2 border">
@@ -362,17 +362,17 @@ const KeHoachGiangDayPage = () => {
                     ) : (
                       <tr className="hover:bg-gray-50">
                         <td className="p-2 border text-center">{keHoachIndex + 1}</td>
-                        <td className="p-2 border">{keHoach.hocPhan.maHP}</td>
+                        <td className="p-2 border">{keHoach.hocPhan.maHocPhan}</td>
                         <td className="p-2 border">{keHoach.hocPhan.tenHocPhan}</td>
                         <td className="p-2 border text-center">{keHoach.hocPhan.soTinChi}</td>
                         <td className="p-2 border">{keHoach.khoa}</td>
                         <td className="p-2 border text-center">{keHoach.hocPhan.soTietLyThuyet}</td>
-                        <td className="p-2 border text-center">{keHoach.hocPhan.soTietThucTap}</td>
+                        <td className="p-2 border text-center">{keHoach.hocPhan.soTietBaiTap}</td>
                         <td className="p-2 border text-center">{keHoach.hocPhan.soTietThucHanh}</td>
-                        <td className="p-2 border text-center">{keHoach.hocPhan.soTietTong}</td>
-                        <td className="p-2 border text-center">{keHoach.heSoHP.toFixed(2)}</td>
+                        <td className="p-2 border text-center">{keHoach.hocPhan.soTietTongCong}</td>
+                        <td className="p-2 border text-center">{keHoach.heSo.toFixed(2)}</td>
                         <td className="p-2 border text-center">{keHoach.tongSoNhom}</td>
-                        <td className="p-2 border text-center">{keHoach.slsvNhom}</td>
+                        <td className="p-2 border text-center">{keHoach.soSinhVien1Nhom}</td>
                         <td className="p-2 border text-center" colSpan="6"></td>
                       </tr>
                     )}
@@ -383,8 +383,7 @@ const KeHoachGiangDayPage = () => {
           </table>
         </div>
       </div>
-
-      {/* Sử dụng các modal component */}
+      {/* 
       <AddKeHoachModal
         isOpen={isModalOpen && modalMode === 'add'}
         onClose={handleCloseModal}
@@ -412,7 +411,7 @@ const KeHoachGiangDayPage = () => {
         phanCong={selectedPhanCong}
         setPhanCong={setSelectedPhanCong}
         refresh={() => setNeedRefresh(true)}
-      />
+      /> */}
     </div>
   );
 };

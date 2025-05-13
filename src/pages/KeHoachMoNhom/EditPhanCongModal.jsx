@@ -1,31 +1,25 @@
-import { useState } from 'react';
-import { phanCongGiangDayData, keHoachGiangDayData } from '../../dumpData';
+import { useEffect, useState } from 'react';
+import { phanCongGiangDayData, keHoachMoNhomData, giangVienData } from '../../dumpData';
 
-const AddPhanCongModal = ({ isOpen, onClose, keHoach, refresh }) => {
-  if (!isOpen || !keHoach) return null;
-
-  const [phanCong, setPhanCong] = useState({
-    id: phanCongGiangDayData.length + 1,
-    nhom: 0,
-    keHoachMoNhomId: keHoach.id,
-    maCBGD: '',
-    tenCBGD: '',
-    soTietThucHien: 0,
-    soTietThucTe: 0,
-  });
+const EditPhanCongModal = ({ isOpen, onClose, keHoach, phanCong, setPhanCong, refresh }) => {
+  if (!isOpen || !keHoach || !phanCong) return null;
 
   const onSave = () => {
     // Validate form data here
-    if (!phanCong.maCBGD || !phanCong.tenCBGD) {
+    if (!phanCong.giangVien_id) {
       alert('Vui lòng điền đầy đủ thông tin!');
       return;
     }
 
-    // Fake Xu ly o banckend
-    let keHoachData = keHoachGiangDayData.find(item => item.id == keHoach.id);
+    // Fake Xu ly o backend
+    let keHoachData = keHoachMoNhomData.find(item => item.id == keHoach.id);
     if (keHoachData) {
-      phanCongGiangDayData.push(phanCong);
-      keHoachData.phanCong.push(phanCong);
+      let keHoachPhanCongIndex = keHoachData.phanCong.findIndex(item => item.id === keHoach.id);
+      let phanCongIndex = phanCongGiangDayData.findIndex(item => item.id === phanCong.id);
+      if (keHoachPhanCongIndex !== -1 && phanCongIndex !== -1) {
+        keHoachData.phanCong[keHoachPhanCongIndex] = phanCong;
+        phanCongGiangDayData[phanCongIndex] = phanCong;
+      }
     }
 
     // Close modal and refresh data
@@ -43,12 +37,12 @@ const AddPhanCongModal = ({ isOpen, onClose, keHoach, refresh }) => {
             <label className="block text-sm font-medium mb-1">Nhóm</label>
             <input
               type="text"
-              name="nhom"
-              value={phanCong.nhom || ''}
+              name="soNhom"
+              value={phanCong.soNhom || ''}
               onChange={e =>
                 setPhanCong({
                   ...phanCong,
-                  nhom: parseInt(e.target.value),
+                  soNhom: parseInt(e.target.value),
                 })
               }
               className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -57,34 +51,24 @@ const AddPhanCongModal = ({ isOpen, onClose, keHoach, refresh }) => {
 
           <div>
             <label className="block text-sm font-medium mb-1">Mã CBGD</label>
-            <input
-              type="text"
-              name="maCBGD"
-              value={phanCong.maCBGD || ''}
+            <select
+              name="giangVien_id"
+              value={phanCong.giangVien_id || ''}
               onChange={e =>
                 setPhanCong({
                   ...phanCong,
-                  maCBGD: e.target.value,
+                  giangVien_id: e.target.value,
                 })
               }
               className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Họ và tên CBGD</label>
-            <input
-              type="text"
-              name="tenCBGD"
-              value={phanCong.tenCBGD || ''}
-              onChange={e =>
-                setPhanCong({
-                  ...phanCong,
-                  tenCBGD: e.target.value,
-                })
-              }
-              className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            >
+              <option value="">Chọn giảng viên</option>
+              {giangVienData.map(item => (
+                <option key={item.id} value={item.id}>
+                  {item.id} - {item.tenGV}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
@@ -104,17 +88,12 @@ const AddPhanCongModal = ({ isOpen, onClose, keHoach, refresh }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Số tiết thực tế</label>
+            <label className="block text-sm font-medium mb-1">Số tiết thực tế(fake)</label>
             <input
               type="number"
               name="soTietThucTe"
-              value={phanCong.soTietThucTe || 0}
-              onChange={e =>
-                setPhanCong({
-                  ...phanCong,
-                  soTietThucTe: parseInt(e.target.value),
-                })
-              }
+              value={phanCong.soTietThucHien || 0}
+              readOnly
               className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -139,4 +118,4 @@ const AddPhanCongModal = ({ isOpen, onClose, keHoach, refresh }) => {
   );
 };
 
-export default AddPhanCongModal;
+export default EditPhanCongModal;

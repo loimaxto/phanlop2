@@ -1,72 +1,47 @@
-import { hocPhanData, keHoachGiangDayData } from '../../dumpData';
+import { hocPhanData, keHoachMoNhomData } from '../../dumpData';
 import { useState, useEffect } from 'react';
 
-//chua xong
-const AddKeHoachModal = ({ isOpen, onClose, refresh }) => {
-  const [maHP, setMaHP] = useState('');
-  const [formKeHoach, setFormKeHoach] = useState({
-    maHP: '',
-    tenHocPhan: '',
-    soTinChi: 0,
-    soTietLyThuyet: 0,
-    soTietThucTap: 0,
-    soTietThucHanh: 0,
-    soTietTong: 0,
-    khoa: '',
-    heSoHP: 0,
-    tongSoNhom: 0,
-    slsvNhom: 0,
-    phanCong: [],
-  });
+const EditKeHoachModal = ({ isOpen, onClose, keHoach, refresh }) => {
+  if (!isOpen || !keHoach) return null;
+
+  const [maHP, setMaHP] = useState(keHoach.hocPhan_id || keHoach.hocPhan?.id || '');
+  const [formKeHoach, setFormKeHoach] = useState(keHoach);
 
   //xu ly thay doi maHP
   useEffect(() => {
-    let hocPhan = hocPhanData.find(item => item.maHP == maHP);
+    let hocPhan = hocPhanData.find(item => item.id == maHP);
     if (hocPhan) {
       setFormKeHoach({
         ...formKeHoach,
-        maHP: maHP,
-        tenHocPhan: hocPhan.tenHocPhan,
-        soTinChi: hocPhan.soTinChi,
-        soTietLyThuyet: hocPhan.soTietLyThuyet,
-        soTietThucTap: hocPhan.soTietThucTap,
-        soTietThucHanh: hocPhan.soTietThucHanh,
-        soTietTong: hocPhan.soTietTong,
+        hocPhan_id: parseInt(maHP),
+        hocPhan: hocPhan,
       });
     }
   }, [maHP]);
 
-  //xu ly them ke hoach
+  //xu ly luu edit ke hoach
   const onSave = () => {
     // Validate form data here
-    if (!formKeHoach.maHP || !formKeHoach.khoa) {
+    if (!formKeHoach.hocPhan_id || !formKeHoach.khoa) {
       alert('Vui lòng điền đầy đủ thông tin!');
       return;
     }
 
-    keHoachGiangDayData.push({
-      id: keHoachGiangDayData.length + 1,
-      maHP: formKeHoach.maHP,
-      tenHocPhan: formKeHoach.tenHocPhan,
-      hocPhan: hocPhanData.find(item => item.maHP == formKeHoach.maHP),
-      khoa: formKeHoach.khoa,
-      heSoHP: parseFloat(formKeHoach.heSoHP),
-      tongSoNhom: formKeHoach.tongSoNhom,
-      slsvNhom: formKeHoach.slsvNhom,
-      phanCong: formKeHoach.phanCong,
-    });
+    //phan cua backend
+    let index = keHoachMoNhomData.findIndex(item => item.id == keHoach.id);
+    if (index !== -1) {
+      keHoachMoNhomData.splice(index, 1, formKeHoach);
+      console.log('formKeHoach', formKeHoach);
+    }
 
-    'Form data:', formKeHoach;
     refresh();
     onClose();
   };
 
-  if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 bg-[#00000080] flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-4xl">
-        <h2 className="text-xl font-bold mb-4">Thêm kế hoạch mới</h2>
+        <h2 className="text-xl font-bold mb-4">Sửa kế hoạch mới</h2>
 
         <div className="grid grid-cols-3 gap-4 mb-4">
           <div className="col-span-3">
@@ -74,14 +49,14 @@ const AddKeHoachModal = ({ isOpen, onClose, refresh }) => {
             <select
               type="text"
               name="tenHocPhan"
-              defaultValue={formKeHoach.maHP || ''}
+              defaultValue={formKeHoach.hocPhan?.id || ''}
               onChange={e => setMaHP(e.target.value)}
               className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Chọn học phần</option>
               {hocPhanData.map(item => (
-                <option key={item.tenHocPhan} value={item.maHP}>
-                  {item.maHP} - {item.tenHocPhan}
+                <option key={item.id} value={item.id}>
+                  {item.id} - {item.tenHP}
                 </option>
               ))}
             </select>
@@ -92,7 +67,7 @@ const AddKeHoachModal = ({ isOpen, onClose, refresh }) => {
             <input
               type="number"
               name="soTinChi"
-              value={formKeHoach.soTinChi}
+              value={formKeHoach.hocPhan?.soTinChi || ''}
               readOnly
               className="border border-gray-300 rounded-md px-3 py-2 w-full bg-gray-100"
             />
@@ -114,7 +89,7 @@ const AddKeHoachModal = ({ isOpen, onClose, refresh }) => {
             <input
               type="number"
               name="soTiet.LT"
-              value={formKeHoach.soTietLyThuyet || 0}
+              value={formKeHoach.hocPhan?.soTietLT || 0}
               readOnly
               className="border border-gray-300 rounded-md px-3 py-2 w-full bg-gray-100"
             />
@@ -125,7 +100,7 @@ const AddKeHoachModal = ({ isOpen, onClose, refresh }) => {
             <input
               type="number"
               name="soTiet.BT"
-              value={formKeHoach.soTietThucTap || 0}
+              value={formKeHoach.hocPhan?.soTietBT || 0}
               readOnly
               className="border border-gray-300 rounded-md px-3 py-2 w-full bg-gray-100"
             />
@@ -136,7 +111,7 @@ const AddKeHoachModal = ({ isOpen, onClose, refresh }) => {
             <input
               type="number"
               name="soTiet.TH"
-              value={formKeHoach.soTietThucHanh || 0}
+              value={formKeHoach.hocPhan?.soTietTH || 0}
               readOnly
               className="border border-gray-300 rounded-md px-3 py-2 w-full bg-gray-100"
             />
@@ -147,7 +122,7 @@ const AddKeHoachModal = ({ isOpen, onClose, refresh }) => {
             <input
               type="number"
               name="soTiet.TC"
-              value={formKeHoach.soTietTong || 0}
+              value={formKeHoach.hocPhan?.soTietLT || 0}
               readOnly
               className="border border-gray-300 rounded-md px-3 py-2 w-full bg-gray-100"
             />
@@ -159,8 +134,8 @@ const AddKeHoachModal = ({ isOpen, onClose, refresh }) => {
               type="number"
               step="0.01"
               name="heSoHP"
-              value={formKeHoach.heSoHP || 0}
-              onChange={e => setFormKeHoach({ ...formKeHoach, heSoHP: e.target.value })}
+              value={formKeHoach.heSo || 0}
+              onChange={e => setFormKeHoach({ ...formKeHoach, heSo: e.target.value })}
               className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -171,18 +146,20 @@ const AddKeHoachModal = ({ isOpen, onClose, refresh }) => {
               type="number"
               name="tongSoNhom"
               value={formKeHoach.tongSoNhom || 0}
-              onChange={e => setFormKeHoach({ ...formKeHoach, tongSoNhom: e.target.value })}
+              onChange={e =>
+                setFormKeHoach({ ...formKeHoach, tongSoNhom: parseInt(e.target.value) })
+              }
               className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">SLSV/Nhóm</label>
+            <label className="block text-sm font-medium mb-1">Số sinh viên</label>
             <input
               type="number"
-              name="slsvNhom"
-              value={formKeHoach.slsvNhom || 0}
-              onChange={e => setFormKeHoach({ ...formKeHoach, slsvNhom: e.target.value })}
+              name="soSinhVien"
+              value={formKeHoach.tongSoSinhVien || 0}
+              onChange={e => setFormKeHoach({ ...formKeHoach, tongSoSinhVien: e.target.value })}
               className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -207,4 +184,4 @@ const AddKeHoachModal = ({ isOpen, onClose, refresh }) => {
   );
 };
 
-export default AddKeHoachModal;
+export default EditKeHoachModal;
