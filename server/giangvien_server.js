@@ -232,7 +232,7 @@ app.get('/api/phanconggiangday/khoa/:khoa', (req, res) => {
     JOIN  
       giangvien gv ON gv.id = pcgd.giangVien_id  -- JOIN bảng giảng viên 
     WHERE   
-      gv.khoa = ? AND pcgd.status = 1  
+      gv.khoa = ? AND pcgd.status = 1  AND gv.status = 1
     GROUP BY   
       hp.id, hp.tenHP, hp.soTinChi, gv.id, gv.tenGV, gv.namSinh, gv.chucDanh, gv.khoa
     `;
