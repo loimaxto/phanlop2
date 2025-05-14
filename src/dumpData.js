@@ -343,3 +343,31 @@ export const keHoachGiangDayData = [
     phanCong: phanCongGiangDayData.filter(item => item.keHoachMoNhomId == 3),
   },
 ];
+
+
+// export const curriculumListData = {
+//   'code': 200,
+//   'statusCode': 200,
+//   'message': 'OK',
+//   'result': [
+//     {
+//       'id': 1,
+//       'nganhId': '1',
+//       'heDaoTao': 'Chính quy',
+//       'khoanQuanLy': 'CNNT',
+//       'trinhDo': 'Cử nhân',
+//       'namBanHanh': 2023,
+//       'thoiGianDaoTao': 4,
+//       'tinChi': 120,
+//       'tongTinChi': 120,
+
+//     },
+//     {
+//       'id': 2,
+//       'nganhId': '2',
+//       'heDaoTao': 'Từ xa',
+//       'trinhDo': 'Thạc sĩ',
+//       'namBanHanh': 2023,
+//     },
+//   ]
+// }

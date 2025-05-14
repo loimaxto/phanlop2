@@ -1,151 +1,190 @@
-import React, { useState } from 'react'; // Import useState
+import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-export default function CreateCurriculumPage() {
-  const [contentItems, setContentItems] = useState([
-    { id: Date.now() }, // Use a unique ID, timestamp is simple here
-  ]);
+import { getListAll } from '@services/NganhService';
+import { createThongTinChung } from '@services/ThongTinChungService';
 
-  // Function to add a new content item
-  const handleAddItem = () => {
-    setContentItems(prevItems => [
-      ...prevItems,
-      { id: Date.now() }, // Add a new item with a unique ID
-    ]);
+export default function CreateCurriculumModal({ isOpen, onClose }) {
+  const [formData, setFormData] = useState({
+    nganhId: '',
+    khoaQuanLy: '',
+    loaiHinhDaoTao: '',
+    loaiBang: '',
+    tongTinChi: '',
+    thoiGianDaoTao: '',
+    banHanh: '',
+    website: '',
+    ngonNgu: '',
+  });
+
+  const [industries, setIndustries] = useState([]);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchData();
+    }
+  }, [isOpen]);
+
+  const fetchData = async () => {
+    try {
+      const response = await getListAll();
+      setIndustries(response.data);
+    } catch (error) {
+      toast.error('Lỗi khi tải danh sách ngành.');
+    }
   };
 
-  // Function to remove a content item by its ID
-  const handleRemoveItem = idToRemove => {
-    setContentItems(prevItems => prevItems.filter(item => item.id !== idToRemove));
+  const handleInputChange = e => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
   };
-  /*
-       <td >Mã CTDT</td>
-                                <td >Ngành</td>
-                                <td >Khoa quản lý</td>
-                                <td >Hệ đào tạo</td>
-                                <td >Trình độ</td>
-                                <td >Tính chỉ</td>
-                                <td >Thời gian</td>
-                                <td >Năm ban hành</td>
-    */
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+
+    const formDataToSend = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      formDataToSend.append(key, value);
+    });
+
+    try {
+      const response = await createThongTinChung(formDataToSend);
+      const data = response.data;
+
+      if (response.statusCode === 201) {
+        toast.success('Tạo chương trình đào tạo thành công!');
+        onClose();
+      } else {
+        toast.error('Đã xảy ra lỗi khi tạo chương trình.');
+      }
+    } catch (error) {
+      console.error('Lỗi gửi form:', error);
+      toast.error('Lỗi hệ thống! Vui lòng thử lại.');
+    }
+  };
+
+  if (!isOpen) return null;
+
   return (
-    <div>
-      <h1 className="modal-header font-bold">Tạo chương trình đào tạo</h1>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-5xl max-h-[90vh] overflow-y-auto p-6 relative">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-black"
+          title="Đóng"
+        >
+          <span className="icon-[tabler--x] size-6"></span>
+        </button>
 
-      <div className="w-full flex flex-row justify-center   self-center gap-6 mb-10">
-        <div>
-          <div className="w-96">
-            <label className="label-text" for="favorite-simpson">
-              Chọn ngành
-            </label>
-            <select className="select" id="favorite-simpson">
-              <option>Business</option>
-              <option>Cntt</option>
-            </select>
-          </div>
-          <div className="w-96">
-            <label className="label-text" for="favorite-simpson">
-              Khoa quản lý
-            </label>
-            <select className="select" id="favorite-simpson">
-              <option>Tài chính - kế toán</option>
-              <option>Cơ khí</option>
-            </select>
-          </div>
-          <div className="w-96">
-            <label className="label-text" for="favorite-simpson">
-              Hệ đào tạo
-            </label>
-            <select className="select" id="favorite-simpson">
-              <option>Chính quy</option>
-              <option>Từ xa</option>
-            </select>
-          </div>
-          <div className="w-96">
-            <label className="label-text" for="favorite-simpson">
-              Trình độ
-            </label>
-            <select className="select" id="favorite-simpson">
-              <option>Cử nhân</option>
-              <option> Thạc sĩ </option>
-            </select>
-          </div>
-        </div>
-        <div>
-          <div className="w-96">
-            <label className="label-text" for="favorite-simpson">
-              Tổng tín chỉ
-            </label>
-            <input className="input" type="number" name="" id="" />
-          </div>
-          <div className="w-96">
-            <label className="label-text" for="favorite-simpson">
-              Thời gian đào tạo
-            </label>
-            <input className="input" type="number" name="" id="" />
-          </div>
-          <div className="w-96">
-            <label className="label-text" for="favorite-simpson">
-              Năm ban hành
-            </label>
-            <input className="input" type="number" name="" id="" />
-          </div>
-        </div>
-      </div>
-      <div className="mb-10 ">
-        <div id="content-de-cuong " className="mb-4 max-w-md ml-auto mr-auto ">
-          <div className=" grid grid-cols-[1fr_1fr_auto] gap-2 p-1 border border-gray-300 rounded-t-md">
-            {' '}
-            {/* Added rounded-t-md */}
-            <div className="font-bold text-center">Mã học phần</div>
-            <div className="font-bold text-center">Học kì dạy</div>
-          </div>
-          {contentItems.map((item, index) => (
-            <div
-              key={item.id} // Add unique key for React list rendering
-              className={`content-item  grid grid-cols-[1fr_1fr_auto] gap-2 p-4 items-center border border-t-0 border-gray-300 ${
-                index === contentItems.length - 1 ? 'rounded-b-md' : ''
-              }`} // Add border, remove top border for subsequent items, add rounded-b-md for last item
-            >
-              <div>
-                <input type="text" placeholder="VD: Bài tập lớn" className="input w-full" />
-              </div>{' '}
-              {/* Added placeholder */}
-              <div>
+        <h1 className="text-xl font-bold mb-6 text-center">Tạo chương trình đào tạo</h1>
+
+        <form onSubmit={handleSubmit}>
+          <div className="w-full flex flex-wrap justify-center gap-6 mb-10">
+            {/* NGÀNH */}
+            <div className="w-80 mb-3">
+              <label className="label-text">Ngành</label>
+              <select
+                className="select w-full"
+                name="nganhId"
+                value={formData.nganhId}
+                onChange={handleInputChange}
+              >
+                <option value="">-- Chọn ngành --</option>
+                {industries.map(industry => (
+                  <option key={industry.id} value={industry.id}>
+                    ({industry.maNganh}) - {industry.tenNganh}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Khoa, Hệ, Trình độ */}
+            {[
+              { label: 'Khoa quản lý', key: 'khoaQuanLy' },
+              { label: 'Hệ đào tạo', key: 'loaiHinhDaoTao' },
+              { label: 'Trình độ', key: 'loaiBang' },
+            ].map(({ label, key }) => (
+              <div key={key} className="w-80 mb-3">
+                <label className="label-text">{label}</label>
                 <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  placeholder="VD: 30"
+                  type="text"
+                  name={key}
+                  value={formData[key]}
+                  onChange={handleInputChange}
                   className="input w-full"
                 />
-              </div>{' '}
-              {/* Added placeholder, max */}
-              <div className="w-min">
-                {/* Add onClick handler to the remove button */}
-                <button
-                  type="button" // Good practice to specify button type
-                  onClick={() => handleRemoveItem(item.id)}
-                  className="text-red-500 hover:text-red-700 disabled:opacity-50" // Added styling and disabled state
-                  disabled={contentItems.length <= 1} // Disable removing if only one item left
-                  title="Xóa nội dung" // Added title for accessibility
-                >
-                  <span className="icon-[tabler--trash] size-5"></span>
-                </button>
               </div>
-            </div>
-          ))}
-        </div>
-        <button
-          onClick={handleAddItem}
-          type="button" // Good practice to specify button type
-          className="btn btn-soft btn-gradient text-white "
-        >
-          Thêm môn học
-        </button>
-      </div>
+            ))}
 
-      <div className="grid place-items-center">
-        <button className="btn btn-success">Xác nhận</button>
+            {/* Tổng tín chỉ & thời gian đào tạo */}
+            {[
+              { label: 'Tổng tín chỉ', key: 'tongTinChi' },
+              { label: 'Thời gian đào tạo', key: 'thoiGianDaoTao' },
+            ].map(({ label, key }) => (
+              <div key={key} className="w-80 mb-3">
+                <label className="label-text">{label}</label>
+                <input
+                  type="number"
+                  name={key}
+                  value={formData[key]}
+                  onChange={handleInputChange}
+                  className="input w-full"
+                />
+              </div>
+            ))}
+
+            {/* Website & Ngôn ngữ */}
+            {[
+              {
+                label: 'Website',
+                key: 'website',
+                type: 'text',
+                placeholder: 'https://ten-truong.edu.vn',
+              },
+              {
+                label: 'Ngôn ngữ',
+                key: 'ngonNgu',
+                type: 'text',
+                placeholder: 'Ví dụ: Tiếng Việt, English',
+              },
+            ].map(({ label, key, type, placeholder }) => (
+              <div key={key} className="w-80 mb-3">
+                <label className="label-text">{label}</label>
+                <input
+                  type={type}
+                  name={key}
+                  value={formData[key]}
+                  onChange={handleInputChange}
+                  className="input w-full"
+                  placeholder={placeholder}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Ban hành */}
+          <div className="w-full mb-6">
+            <label className="label-text">Ban hành</label>
+            <textarea
+              name="banHanh"
+              className="textarea w-full"
+              rows="4"
+              value={formData.banHanh}
+              onChange={handleInputChange}
+              placeholder="VD: Thông tư ban hành"
+            ></textarea>
+          </div>
+
+          <div className="grid place-items-center">
+            <button type="submit" className="btn btn-success">
+              Xác nhận
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
