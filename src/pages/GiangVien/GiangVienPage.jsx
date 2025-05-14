@@ -4,6 +4,7 @@ import { FaSearch, FaEye, FaTrashAlt } from 'react-icons/fa';
 import GiangVienDetailsModal from './GiangVienDetailsModal';
 import GiangVienEditModal from './GiangVienEditModal';
 import ThemGiangVienModal from './ThemGiangVienModal';
+import MauinGiangVienModal from './MauinGiangVienModal';
 
 
 const GiangVienPage = () => {
@@ -15,6 +16,7 @@ const GiangVienPage = () => {
   const [searchText, setSearchText] = useState('');
   const [nganhList, setNganhList] = useState([]); // Lưu danh sách ngành
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
 
   useEffect(() => {
@@ -141,9 +143,10 @@ const handleDelete = async (e, giangVien) => {
           <button className="btn btn-primary gap-2" onClick={() => setIsAddModalOpen(true)}>
             <MdAdd /> Thêm
           </button>
-          <button className="btn btn-accent gap-2">
-            <MdImportExport /> Export mẫu in
-          </button>
+        <button className="btn btn-accent gap-2" onClick={() => setIsExportModalOpen(true)}>
+          <MdImportExport /> Export mẫu in
+        </button>
+
         </div>
 
         <div className="flex flex-col md:flex-row gap-3 w-full lg:w-1/2">
@@ -307,6 +310,11 @@ const handleDelete = async (e, giangVien) => {
     // TODO: Gọi API để lưu giảng viên mới
     console.log('Giảng viên mới:', newGV);
   }}
+/>
+
+<MauinGiangVienModal
+  show={isExportModalOpen}
+  onClose={() => setIsExportModalOpen(false)}
 />
 
     </div> 

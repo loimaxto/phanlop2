@@ -44,21 +44,29 @@ app.get('/api/phanconggiangday/:idGV', (req, res) => {
 SELECT 
   hp.id AS MAHP,
   hp.tenHP AS TenHP,
-  hp.soTinChi AS SoTC,
-  MAX(pcgd.soTietThucHien) AS SoTiet, -- dùng MAX để tránh lỗi khi GROUP BY
-  SUM(CASE WHEN pcgd.hocKiDay = 1 THEN 1 ELSE 0 END) AS hk1,
+  hp.soTinChi AS SoTC, 
+  MAX(pcgd.soTietThucHien) AS SoTiet, -- dùng MAX để tránh lỗi khi GROUP BY 
+  SUM(CASE WHEN pcgd.hocKiDay = 1 THEN 1 ELSE 0 END) AS hk1, 
   SUM(CASE WHEN pcgd.hocKiDay = 2 THEN 1 ELSE 0 END) AS hk2,
-  SUM(CASE WHEN pcgd.hocKiDay = 3 THEN 1 ELSE 0 END) AS hk3
+  SUM(CASE WHEN pcgd.hocKiDay = 3 THEN 1 ELSE 0 END) AS hk3,
+  gv.id AS GiangVienID,      -- ID giảng viên
+  gv.tenGV AS TenGV,  -- Tên giảng viên
+  gv.namSinh AS NamSinh,    -- Năm minh
+  gv.chucDanh AS ChucDanh,   -- Chức danh
+  gv.khoa AS khoa
 FROM 
   phanconggiangday pcgd
 JOIN 
   kehoachmonhom khmn ON khmn.id = pcgd.khMoNhom_id
 JOIN 
   hocphan hp ON hp.id = khmn.hocPhan_id
-WHERE 
-  pcgd.giangVien_id = ? AND pcgd.status = 1
-GROUP BY 
-  hp.id, hp.tenHP, hp.soTinChi
+JOIN 
+  giangvien gv ON gv.id = pcgd.giangVien_id  -- JOIN bảng giảng viên
+WHERE  
+  pcgd.giangVien_id = ? AND pcgd.status = 1 
+GROUP BY  
+  hp.id, hp.tenHP, hp.soTinChi, gv.id, gv.tenGV, gv.namSinh, gv.chucDanh, gv.khoa
+
 
     `;
   
@@ -198,6 +206,47 @@ app.post('/api/giangvien/them', (req, res) => {
   });
 });
 
+//lấy danh sách các nhóm học phần theo khoa
+app.get('/api/phanconggiangday/khoa/:khoa', (req, res) => {
+    const khoa = decodeURIComponent(req.params.khoa);  // Giải mã URL
+    const query = `
+    SELECT 
+      hp.id AS MAHP,
+      hp.tenHP AS TenHP,
+      hp.soTinChi AS SoTC, 
+      MAX(pcgd.soTietThucHien) AS SoTiet, -- dùng MAX để tránh lỗi khi GROUP BY 
+      SUM(CASE WHEN pcgd.hocKiDay = 1 THEN 1 ELSE 0 END) AS hk1, 
+      SUM(CASE WHEN pcgd.hocKiDay = 2 THEN 1 ELSE 0 END) AS hk2,
+      SUM(CASE WHEN pcgd.hocKiDay = 3 THEN 1 ELSE 0 END) AS hk3,
+      gv.id AS GiangVienID,      -- ID giảng viên
+      gv.tenGV AS TenGV,  -- Tên giảng viên
+      gv.namSinh AS NamSinh,    -- Năm sinh
+      gv.chucDanh AS ChucDanh,   -- Chức danh
+      gv.khoa AS khoa
+    FROM 
+      phanconggiangday pcgd
+    JOIN  
+      kehoachmonhom khmn ON khmn.id = pcgd.khMoNhom_id 
+    JOIN  
+      hocphan hp ON hp.id = khmn.hocPhan_id 
+    JOIN  
+      giangvien gv ON gv.id = pcgd.giangVien_id  -- JOIN bảng giảng viên 
+    WHERE   
+      gv.khoa = ? AND pcgd.status = 1  
+    GROUP BY   
+      hp.id, hp.tenHP, hp.soTinChi, gv.id, gv.tenGV, gv.namSinh, gv.chucDanh, gv.khoa
+    `;
+
+    // Execute the query
+    db.query(query, [khoa], (err, result) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Server error');
+        } else {
+            res.json(result);
+        }
+    });
+});
 
 
 
