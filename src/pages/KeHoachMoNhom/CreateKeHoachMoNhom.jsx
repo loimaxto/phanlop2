@@ -2,6 +2,7 @@ import { useAppContext } from '../../context/AppContext';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import KeHoachMoNhomService from '../../services/KeHoachMoNhomService';
+import { toast } from 'react-toastify';
 
 export default function ThemKeHoachMoNhom() {
   const navigate = useNavigate();
@@ -32,10 +33,10 @@ export default function ThemKeHoachMoNhom() {
       try {
         console.log('Form data before submission:', formData);
         const response = await KeHoachMoNhomService.createKeHoachMoNhom(formData);
-        if (!response || !response.data) {
-          console.error('Lỗi khi tạo kế hoạch mở nhóm');
+        if (!response) {
           return;
         }
+        toast.success('Thêm kế hoạch mở nhóm thành công');
         setFormData({
           maHocPhan: '',
           khoa: '',
