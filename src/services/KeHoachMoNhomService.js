@@ -18,6 +18,7 @@ const createKeHoachMoNhom = async data => {
     return response.data;
   } catch (error) {
     console.error('Error creating Ke Hoach Mo Nhom:', error);
+    toast.error('Lỗi khi tạo kế hoạch mở nhóm\n' + error.response?.data?.message);
     throw error;
   }
 };
@@ -72,6 +73,7 @@ const createPhanCong = async data => {
     const response = await axios.post(`${API_BASE_URL}/api/v1/phan-cong-giang-day`, data);
     return response.data;
   } catch (error) {
+    console.error(error);
     console.error('Error creating Phan Cong:', error.response?.data?.message);
     toast.error('Lỗi khi tạo phân công\n' + error.response?.data?.message);
     return null;

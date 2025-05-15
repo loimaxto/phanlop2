@@ -243,21 +243,10 @@ const KeHoachGiangDayPage = () => {
                 <th className="p-2 border text-center" rowSpan="2">
                   SLSV/ Nhóm
                 </th>
-                <th className="p-2 border text-center" rowSpan="2">
-                  Nhóm
+                <th className="p-2 border text-center" colSpan="5">
+                  Phân công giảng dạy
                 </th>
-                <th className="p-2 border text-center" rowSpan="2">
-                  Mã CBGD
-                </th>
-                <th className="p-2 border text-center" rowSpan="2">
-                  Họ và tên CBGD
-                </th>
-                <th className="p-2 border text-center" rowSpan="2">
-                  Số tiết thực hiện
-                </th>
-                <th className="p-2 border text-center" rowSpan="2">
-                  Số tiết thực tế
-                </th>
+
                 <th className="p-2 border text-center" rowSpan="2">
                   Thao tác
                 </th>
@@ -267,6 +256,21 @@ const KeHoachGiangDayPage = () => {
                 <th className="p-2 border text-center">TT</th>
                 <th className="p-2 border text-center">TH</th>
                 <th className="p-2 border text-center">TC</th>
+                <th className="p-2 border text-center" colSpan="1" rowSpan="1">
+                  Nhóm
+                </th>
+                <th className="p-2 border text-center" colSpan="1" rowSpan="1">
+                  Mã CBGD
+                </th>
+                <th className="p-2 border text-center" rowSpan="1">
+                  Họ và tên CBGD
+                </th>
+                <th className="p-2 border text-center" rowSpan="1">
+                  Số tiết thực hiện
+                </th>
+                <th className="p-2 border text-center" rowSpan="1">
+                  Số tiết thực tế
+                </th>
               </tr>
             </thead>
             <tbody>

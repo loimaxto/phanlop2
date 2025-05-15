@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import '../assets/fonts/times-normal.js';
 import '../assets/fonts/times-bold.js';
+import { integerToRoman } from './helpers.js';
 
 jsPDF.API.autoTable = autoTable;
 
@@ -111,14 +112,14 @@ export const printKeHoachDayHoc = (
   const tableData = [];
   let stt = 1;
 
-  khoiKienThucData.forEach(khoi => {
+  khoiKienThucData.forEach((khoi, khoiIndex) => {
     const khoiItems = groupedDataByKhoi[khoi.id]?.items || [];
     if (khoiItems.length === 0 && selectedGroup !== 'all') return;
     const nhomInKhoi = nhomKienThucData.filter(nhom => nhom.khoiKienThucId === khoi.id);
     const khoiTotalTC = khoiItems.reduce((sum, item) => sum + item.soTinChi, 0);
     tableData.push([
       {
-        content: `Khối: ${khoi.name} (${khoiItems.length} học phần)`,
+        content: `${integerToRoman(khoiIndex + 1)}. ${khoi.name} (${khoiItems.length} học phần)`,
         colSpan: 3,
         styles: {
           fontStyle: 'bold',
@@ -145,19 +146,6 @@ export const printKeHoachDayHoc = (
       },
     ]);
 
-    // if (khoiItems.length > 0) {
-    //   const khoiTotalTC = khoiItems.reduce((sum, item) => sum + item.soTinChi, 0);
-    //   tableData.push([
-    //     {
-    //       content: `Tổng số tín chỉ khối ${khoi.name}`,
-    //       colSpan: 3,
-    //       styles: { fontStyle: 'bold', halign: 'left' },
-    //     },
-    //     { content: khoiTotalTC, styles: { halign: 'center' } },
-    //     ...Array(13).fill(''),
-    //   ]);
-    // }
-
     nhomInKhoi.forEach((nhom, nhomIndex) => {
       const nhomItems = groupedDataByKhoi[khoi.id].nhom[nhom.id] || [];
       if (nhomItems.length === 0 && selectedGroup !== 'all') return;
@@ -165,7 +153,7 @@ export const printKeHoachDayHoc = (
 
       tableData.push([
         {
-          content: `Nhóm ${nhomIndex + 1}: ${nhom.tenNhom} (${nhomItems.length} học phần)`,
+          content: `${nhomIndex + 1}. ${nhom.tenNhom} (${nhomItems.length} học phần)`,
           colSpan: 3,
           styles: {
             fontStyle: 'bold',
@@ -192,22 +180,9 @@ export const printKeHoachDayHoc = (
         },
       ]);
 
-      // if (nhomItems.length > 0) {
-      //   const nhomTotalTC = nhomItems.reduce((sum, item) => sum + item.soTinChi, 0);
-      //   tableData.push([
-      //     {
-      //       content: `Tổng số tín chỉ nhóm ${nhom.tenNhom.split('.')[0]}`,
-      //       colSpan: 3,
-      //       styles: { fontStyle: 'bold', halign: 'left' },
-      //     },
-      //     { content: nhomTotalTC, styles: { halign: 'center' } },
-      //     ...Array(13).fill(''),
-      //   ]);
-      // }
-
       nhomItems.forEach(course => {
         const semesters = Array(12).fill('');
-        course.hocKy.forEach(hk => {
+        course.hocKi.forEach(hk => {
           semesters[hk - 1] = 'x';
         });
 
@@ -299,7 +274,7 @@ export const printKeHoachDayHoc = (
   doc.save('ke-hoach-day-hoc.pdf');
 };
 
-// Hàm in kế hoạch mở nhóm theo học kỳ
+// Hàm in kế hoạch mở nhóm theo học kỳ, CHUA THAY DUNG
 export const printKeHoachMoNhomTheoHocKy = (hocKy, keHoachData) => {
   // Khởi tạo PDF với khổ giấy A4 nằm ngang
   const doc = new jsPDF('landscape', 'mm', 'a4');
@@ -411,6 +386,7 @@ export const printKeHoachMoNhomTheoHocKy = (hocKy, keHoachData) => {
   doc.save(`ke-hoach-mo-nhom-hoc-ky-${hocKy}.pdf`);
 };
 
+// // CHUA THAY DUNG
 export const printKeHoachMoNhomTongHop = (
   keHoachData,
   schoolName = 'TRƯỜNG ĐẠI HỌC XYZ',

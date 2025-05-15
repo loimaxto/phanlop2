@@ -26,7 +26,6 @@ const EditKeHoachDayHocModal = ({
     nhomKienThucId: '',
     batBuoc: false,
     hocKi: [],
-    namHoc: '',
     ...keHoachDayHoc,
   });
 
@@ -99,7 +98,6 @@ const EditKeHoachDayHocModal = ({
       nhomKienThucId: parseInt(formData.nhomKienThucId),
       batBuoc: formData.batBuoc,
       hocKi: formData.hocKi,
-      namHoc: formData.namHoc,
     };
 
     (async () => {
@@ -188,19 +186,6 @@ const EditKeHoachDayHocModal = ({
             </select>
           </div>
 
-          {/* Năm học */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Năm học</label>
-            <input
-              type="text"
-              name="namHoc"
-              value={formData.namHoc}
-              onChange={handleInputChange}
-              placeholder="Ví dụ: 2024-2025"
-              className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
           {/* Bắt buộc */}
           <div className="col-span-2">
             <label className="block text-sm font-medium mb-1">Bắt buộc</label>
@@ -224,7 +209,7 @@ const EditKeHoachDayHocModal = ({
                 <input
                   type="checkbox"
                   id={`hocki-${i + 1}`}
-                  checked={formData.hocKi.includes(i + 1)}
+                  checked={formData.hocKi?.includes(i + 1)}
                   onChange={() => handleHocKiChange(i + 1)}
                   className="mr-2"
                 />

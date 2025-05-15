@@ -26,7 +26,6 @@ const AddKeHoachDayHocModal = ({
     nhomKienThucId: '',
     batBuoc: false,
     hocKi: [],
-    namHoc: '',
     ...keHoachDayHoc,
   });
 
@@ -99,7 +98,6 @@ const AddKeHoachDayHocModal = ({
       nhomKienThucId: parseInt(formData.nhomKienThucId),
       batBuoc: formData.batBuoc,
       hocKi: formData.hocKi,
-      namHoc: formData.namHoc,
     };
 
     (async () => {
@@ -122,7 +120,6 @@ const AddKeHoachDayHocModal = ({
         nhomKienThucId: '',
         batBuoc: false,
         hocKi: [],
-        namHoc: '',
       });
     }
   }, [isOpen]);
@@ -186,19 +183,6 @@ const AddKeHoachDayHocModal = ({
                 </option>
               ))}
             </select>
-          </div>
-
-          {/* Năm học */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Năm học</label>
-            <input
-              type="text"
-              name="namHoc"
-              value={formData.namHoc}
-              onChange={handleInputChange}
-              placeholder="Ví dụ: 2024-2025"
-              className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
           </div>
 
           {/* Bắt buộc */}

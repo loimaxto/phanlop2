@@ -11,6 +11,7 @@ import AddKhoiKienThucModal from './AddKhoiKienThucModal';
 import EditKhoiKienThucModal from './EditKhoiKienThucModal';
 import ThemNhomKienThucModal from './ThemNhomKienThucModal';
 import SuaNhomKienThucModal from './SuaNhomKienThucModal';
+import { integerToRoman } from '../../services/helpers';
 
 const KeHoachDayHocPage = () => {
   const { thongTinChungId } = useParams();
@@ -65,7 +66,7 @@ const KeHoachDayHocPage = () => {
                   maHP: keHoach.maHocPhan,
                   tenHocPhan: keHoach.tenHocPhan,
                   soTinChi: keHoach.soTinChi,
-                  hocKy: keHoach.hocKi,
+                  hocKi: keHoach.hocKi,
                   maHocPhanTruoc: keHoach.maHocPhanTruoc || '',
                   nhomKienThucId: nhom.id,
                   khoiKienThucId: khoi.id,
@@ -110,7 +111,7 @@ const KeHoachDayHocPage = () => {
       item.tenHocPhan.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesGroup = selectedGroup === 'all' || item.nhomKienThucId == selectedGroup;
-    const matchesHocKy = selectedHocKy === 'all' || item.hocKy.includes(Number(selectedHocKy));
+    const matchesHocKy = selectedHocKy === 'all' || item.hocKi.includes(Number(selectedHocKy));
 
     return matchesSearch && matchesGroup && matchesHocKy;
   });
@@ -452,15 +453,12 @@ const KeHoachDayHocPage = () => {
                     {/* Tiêu đề khối kiến thức */}
                     <tr className={`bg-gray-200 border text-lg`}>
                       <td
-                        colSpan="17"
+                        colSpan="3"
                         className="p-3 font-medium cursor-pointer"
                         onClick={() => toggleKhoi(khoi.id)}
                       >
                         <div className="flex justify-between items-center">
-                          <div>
-                            {khoi.name} ({khoiItems.length} học phần - {khoiCredits[khoi.id]} tín
-                            chỉ)
-                          </div>
+                          <div>{`${integerToRoman(khoiIndex + 1)}. ${khoi.name}`}</div>
                           <div>
                             {expandedKhoi[khoi.id] ? (
                               <svg
@@ -492,6 +490,10 @@ const KeHoachDayHocPage = () => {
                           </div>
                         </div>
                       </td>
+                      <td colSpan="1" className="p-2 border text-center">
+                        {khoiCredits[khoi.id]}
+                      </td>
+                      <td colSpan="13"></td>
                       <td>
                         <div className="flex rounded-lg p-1 ">
                           <button
@@ -560,7 +562,7 @@ const KeHoachDayHocPage = () => {
                               <React.Fragment key={`khoi-${khoi.id}-nhom-${nhom.id}`}>
                                 <tr className={`${getGroupColor(nhomIndex)} border text-sm`}>
                                   <td
-                                    colSpan="17"
+                                    colSpan="3"
                                     className="p-3 font-medium cursor-pointer"
                                     onClick={() => toggleNhom(nhom.id)}
                                   >
@@ -600,8 +602,11 @@ const KeHoachDayHocPage = () => {
                                       </div>
                                     </div>
                                   </td>
-                                  <td>
-                                    <div className="flex rounded-lg p-1 ">
+                                  <td colSpan="1" className="p-3 border text-center">
+                                    {nhomCredits[nhom.id]}
+                                  </td>
+                                  <td colSpan="14">
+                                    <div className="flex rounded-lg p-1 justify-end">
                                       <button
                                         className="p-1 rounded-l-md bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 transition-colors"
                                         title="Sửa nhóm kiến thức"
@@ -667,7 +672,7 @@ const KeHoachDayHocPage = () => {
                                       </td>
                                       {[...Array(12)].map((_, i) => (
                                         <td key={i} className="p-2 border text-center">
-                                          {keHoachDayHoc.hocKy.includes(i + 1) ? (
+                                          {keHoachDayHoc.hocKi.includes(i + 1) ? (
                                             <span className="inline-block w-4 h-4 bg-blue-500 rounded-sm text-white text-xs flex items-center justify-center">
                                               x
                                             </span>
@@ -730,25 +735,6 @@ const KeHoachDayHocPage = () => {
                                     </td>
                                   </tr>
                                 )}
-
-                                {expandedNhom[nhom.id] && nhomItems.length > 0 && (
-                                  <tr
-                                    className={`${getGroupColor(
-                                      nhomIndex
-                                    )} border-t-2 border-gray-300`}
-                                  >
-                                    <td
-                                      colSpan="3"
-                                      className="p-2 border text-right text-sm font-medium"
-                                    >
-                                      Tổng số tín chỉ nhóm {nhom.tenNhom.split('.')[0]}:
-                                    </td>
-                                    <td className="p-2 border text-center font-medium">
-                                      {nhomCredits[nhom.id]}
-                                    </td>
-                                    <td colSpan="13" className="p-2 border"></td>
-                                  </tr>
-                                )}
                               </React.Fragment>
                             );
                           })
@@ -766,7 +752,7 @@ const KeHoachDayHocPage = () => {
                         )}
 
                         {/* Dòng tổng kết cho khối kiến thức */}
-                        {khoiItems.length > 0 && (
+                        {/* {khoiItems.length > 0 && (
                           <tr className={`bg-gray-200 border-t-2 border-gray-400`}>
                             <td colSpan="3" className="p-2 border text-right font-medium">
                               Tổng số tín chỉ khối {khoi.name}:
@@ -776,7 +762,7 @@ const KeHoachDayHocPage = () => {
                             </td>
                             <td colSpan="13" className="p-2 border"></td>
                           </tr>
-                        )}
+                        )} */}
                       </>
                     )}
                   </React.Fragment>
