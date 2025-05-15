@@ -42,11 +42,11 @@ export default function NavBar() {
           </li>
           <li>
             <NavLink
-              to="/ke-hoach-giang-day"
+              to="/ke-hoach-mo-nhom"
               className={({ isActive }) => (isActive ? 'bg-blue-200' : '')}
             >
               <span className="icon-[tabler--home] size-5"></span>
-              Kế hoạch giảng dạy
+              Kế hoạch mở nhóm
             </NavLink>
           </li>
           <li>

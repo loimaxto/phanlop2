@@ -1,91 +1,131 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { nhomKienThucData, hocPhanData } from '../../dumpData';
+import { useAppContext } from '../../context/AppContext';
+import KeHoachDayHocService from '../../services/KeHoachDayHocService';
+import { toast } from 'react-toastify';
 
-const AddKeHoachDayHocModal = ({ isOpen, onClose, onSave }) => {
-  const [currentItem, setCurrentItem] = useState({
-    id: 0,
-    tt: 0,
-    maHP: '',
-    tenHocPhan: '',
-    soTinChi: 0,
-    hocKy: [],
-    maHocPhanTruoc: '',
-    nhomKienThucId: '1', // Mặc định
+const AddKeHoachDayHocModal = ({
+  isOpen,
+  onClose,
+  refresh,
+  keHoachDayHoc,
+  listNhomKienThuc,
+  listKhoiKienThuc,
+}) => {
+  console.log('listNhomKienThuc', listNhomKienThuc);
+  // return null;
+  if (!isOpen) return null;
+
+  const { listHocPhan } = useAppContext();
+
+  const [formData, setFormData] = useState({
+    maHocPhan: '',
+    hocPhanId: 0,
+    khoiKienThucId: '', // Thêm trường cho khối kiến thức
+    nhomKienThucId: '',
+    batBuoc: false,
+    hocKi: [],
+    namHoc: '',
+    ...keHoachDayHoc,
   });
-
-  useEffect(() => {
-    console.log('currentItem', currentItem);
-  }, [currentItem]);
 
   // Xử lý thay đổi trường dữ liệu
   const handleInputChange = e => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
 
-    if (name === 'maHP') {
-      const hocPhan = hocPhanData.find(item => item.maHP == value);
-      console.log('hocPhan', hocPhan);
-      setCurrentItem({
-        ...currentItem,
-        maHP: value,
-        tenHocPhan: hocPhan.tenHocPhan,
-        soTinChi: hocPhan.soTinChi,
-        maHocPhanTruoc: hocPhan.maHocPhanTruoc,
-      });
-      return;
-    }
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
 
-    setCurrentItem({
-      ...currentItem,
-      [name]: value,
+  // Xử lý thay đổi học phần (cập nhật cả hocPhanId và maHocPhan)
+  const handleHocPhanChange = e => {
+    const selectedHocPhanId = parseInt(e.target.value);
+    const selectedHocPhan = listHocPhan.find(hp => hp.id === selectedHocPhanId);
+    setFormData(prev => ({
+      ...prev,
+      hocPhanId: selectedHocPhanId || 0,
+      maHocPhan: selectedHocPhan ? selectedHocPhan.maHocPhan : '',
+    }));
+  };
+
+  // Xử lý thay đổi khối kiến thức (lọc nhóm kiến thức)
+  const handleKhoiChange = e => {
+    const selectedKhoiId = e.target.value;
+    setFormData(prev => ({
+      ...prev,
+      khoiKienThucId: selectedKhoiId,
+      nhomKienThucId: '', // Reset nhóm khi thay đổi khối
+    }));
+  };
+
+  // Lọc nhóm kiến thức dựa trên khối kiến thức được chọn
+  const filteredNhomKienThuc = listNhomKienThuc.filter(
+    nhom => !formData.khoiKienThucId || nhom.khoiKienThucId == formData.khoiKienThucId
+  );
+
+  // Xử lý thay đổi nhóm kiến thức
+  const handleGroupChange = e => {
+    setFormData({
+      ...formData,
+      nhomKienThucId: e.target.value,
     });
   };
 
   // Xử lý thay đổi học kỳ (checkbox)
-  const handleHocKyChange = hocKy => {
-    const hocKyArray = [...currentItem.hocKy];
+  const handleHocKiChange = hocKi => {
+    const hocKiArray = [...formData.hocKi];
 
-    if (hocKyArray.includes(hocKy)) {
-      // Nếu đã có, loại bỏ
-      const index = hocKyArray.indexOf(hocKy);
-      hocKyArray.splice(index, 1);
+    if (hocKiArray.includes(hocKi)) {
+      const index = hocKiArray.indexOf(hocKi);
+      hocKiArray.splice(index, 1);
     } else {
-      // Nếu chưa có, thêm vào
-      hocKyArray.push(hocKy);
+      hocKiArray.push(hocKi);
     }
 
-    setCurrentItem({
-      ...currentItem,
-      hocKy: hocKyArray.sort((a, b) => a - b),
+    setFormData({
+      ...formData,
+      hocKi: hocKiArray.sort((a, b) => a - b),
     });
   };
 
-  // Xử lý thay đổi nhóm môn học trong form
-  const handleGroupChange = e => {
-    setCurrentItem({
-      ...currentItem,
-      nhomKienThucId: e.target.value,
-    });
+  // Xử lý lưu form
+  const handleSubmit = () => {
+    const dataToSave = {
+      maHocPhan: formData.maHocPhan,
+      hocPhanId: parseInt(formData.hocPhanId),
+      nhomKienThucId: parseInt(formData.nhomKienThucId),
+      batBuoc: formData.batBuoc,
+      hocKi: formData.hocKi,
+      namHoc: formData.namHoc,
+    };
+
+    (async () => {
+      const response = await KeHoachDayHocService.addKeHoachDayHoc(dataToSave);
+      if (response) {
+        toast.success('Thêm kế hoạch dạy học thành công');
+        refresh();
+        onClose();
+      }
+    })();
   };
 
   // Reset form khi đóng modal
   useEffect(() => {
     if (!isOpen) {
-      setCurrentItem({
-        id: 0,
-        tt: 0,
-        maHP: '',
-        tenHocPhan: '',
-        soTinChi: 0,
-        hocKy: [],
-        maHocPhanTruoc: '',
-        nhomKienThucId: '1', // Mặc định
+      setFormData({
+        maHocPhan: '',
+        hocPhanId: 0,
+        khoiKienThucId: '',
+        nhomKienThucId: '',
+        batBuoc: false,
+        hocKi: [],
+        namHoc: '',
       });
     }
   }, [isOpen]);
-
-  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-[#00000094] flex items-center justify-center z-50">
@@ -93,75 +133,89 @@ const AddKeHoachDayHocModal = ({ isOpen, onClose, onSave }) => {
         <h2 className="text-xl font-bold mb-4">Thêm học phần mới</h2>
 
         <div className="grid grid-cols-2 gap-4 mb-4">
+          {/* Học phần */}
           <div className="col-span-2">
             <label className="block text-sm font-medium mb-1">Tên học phần</label>
             <select
-              type="text"
-              name="maHP"
-              value={currentItem?.maHP || ''}
-              onChange={handleInputChange}
+              name="hocPhanId"
+              value={formData.hocPhanId || ''}
+              onChange={handleHocPhanChange}
               className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Chọn học phần</option>
-              {hocPhanData.map(item => (
-                <option key={item.tenHocPhan} value={item.maHP}>
-                  {item.maHP} - {item.tenHocPhan}
+              {listHocPhan.map(item => (
+                <option key={item.id} value={item.id}>
+                  {item.maHocPhan} - {item.tenHocPhan}
                 </option>
               ))}
             </select>
           </div>
 
+          {/* Khối kiến thức */}
           <div>
-            <label className="block text-sm font-medium mb-1">Mã học phần</label>
-            <input
-              type="text"
-              value={currentItem?.maHP || ''}
-              readOnly
-              className="border border-gray-300 rounded-md px-3 py-2 w-full bg-gray-100"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Số tín chỉ</label>
-            <input
-              type="number"
-              name="soTinChi"
-              value={currentItem?.soTinChi || 0}
-              readOnly
-              className="border border-gray-300 rounded-md px-3 py-2 w-full bg-gray-100"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Mã học phần trước</label>
-            <input
-              type="text"
-              name="maHocPhanTruoc"
-              value={currentItem?.maHocPhanTruoc || ''}
-              readOnly
-              className="border border-gray-300 rounded-md px-3 py-2 w-full bg-gray-100"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Nhóm môn học</label>
+            <label className="block text-sm font-medium mb-1">Khối kiến thức</label>
             <select
-              name="nhomKienThucId"
-              value={currentItem?.nhomKienThucId || ''}
-              onChange={handleGroupChange}
+              name="khoiKienThucId"
+              value={formData.khoiKienThucId || ''}
+              onChange={handleKhoiChange}
               className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              {nhomKienThucData.map(group => (
-                <option key={group.id} value={group.id}>
-                  {group.name}
+              <option value="">Chọn khối kiến thức</option>
+              {listKhoiKienThuc.map(khoi => (
+                <option key={khoi.id} value={khoi.id}>
+                  {khoi.name}
                 </option>
               ))}
             </select>
+          </div>
 
-            {/* them nut them nhom kien thuc */}
+          {/* Nhóm kiến thức */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Nhóm kiến thức</label>
+            <select
+              name="nhomKienThucId"
+              value={formData.nhomKienThucId || ''}
+              onChange={handleGroupChange}
+              className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={!formData.khoiKienThucId} // Disable if no khoi selected
+            >
+              <option value="">Chọn nhóm kiến thức</option>
+              {filteredNhomKienThuc.map(group => (
+                <option key={group.id} value={group.id}>
+                  {group.tenNhom}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Năm học */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Năm học</label>
+            <input
+              type="text"
+              name="namHoc"
+              value={formData.namHoc}
+              onChange={handleInputChange}
+              placeholder="Ví dụ: 2024-2025"
+              className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Bắt buộc */}
+          <div className="col-span-2">
+            <label className="block text-sm font-medium mb-1">Bắt buộc</label>
+            <input
+              type="checkbox"
+              name="batBuoc"
+              checked={formData.batBuoc}
+              onChange={handleInputChange}
+              className="mr-2"
+            />
+            <span>Có</span>
           </div>
         </div>
 
+        {/* Học kỳ thực hiện */}
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Học kỳ thực hiện</label>
           <div className="grid grid-cols-6 gap-2">
@@ -169,12 +223,12 @@ const AddKeHoachDayHocModal = ({ isOpen, onClose, onSave }) => {
               <div key={i} className="flex items-center">
                 <input
                   type="checkbox"
-                  id={`hocky-${i + 1}`}
-                  checked={currentItem?.hocKy.includes(i + 1) || false}
-                  onChange={() => handleHocKyChange(i + 1)}
+                  id={`hocki-${i + 1}`}
+                  checked={formData.hocKi.includes(i + 1)}
+                  onChange={() => handleHocKiChange(i + 1)}
                   className="mr-2"
                 />
-                <label htmlFor={`hocky-${i + 1}`}>Học kỳ {i + 1}</label>
+                <label htmlFor={`hocki-${i + 1}`}>Học kỳ {i + 1}</label>
               </div>
             ))}
           </div>
@@ -182,13 +236,13 @@ const AddKeHoachDayHocModal = ({ isOpen, onClose, onSave }) => {
 
         <div className="flex justify-end space-x-2">
           <button
-            onClick={onClose}
+            onClick={() => onClose()}
             className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
           >
             Hủy
           </button>
           <button
-            onClick={() => onSave(currentItem)}
+            onClick={handleSubmit}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
             Lưu
