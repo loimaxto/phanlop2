@@ -1,42 +1,66 @@
 import { useState } from 'react';
-import { phanCongGiangDayData, keHoachMoNhomData, giangVienData } from '../../dumpData';
+import { useAppContext } from '../../context/AppContext';
+import KeHoachMoNhomService from '../../services/KeHoachMoNhomService';
+import { toast } from 'react-toastify';
 
-const AddPhanCongModal = ({ isOpen, onClose, keHoach, refresh }) => {
-  if (!isOpen || !keHoach) return null;
+const AddPhanCongModal = ({ isOpen, onClose, keHoachMoNhom, onSave }) => {
+  if (!isOpen || !keHoachMoNhom) return null;
 
-  const [phanCong, setPhanCong] = useState({
-    id: phanCongGiangDayData.length + 1,
-    // nhom: 0,
-    // keHoachMoNhomId: keHoach.id,
-    // maCBGD: '',
-    // tenCBGD: '',
-    // soTietThucHien: 0,
-    // soTietThucTe: 0,
-    khMoNhom_id: 1,
-    giangVien_id: 1,
-    soNhom: 2,
-    hocKiDay: 1,
-    loai: 'Ly thuyet',
-    soTietThucHien: 60,
+  //   {
+  //   "giangVienId": 9007199254740991,
+  //   "keHoachMoNhomId": 9007199254740991,
+  //   "soNhom": 1073741824,
+  //   "hocKyDay": 1,
+  //   "loai": "Bai tap",//Ly thuyet|Thuc hanh|Bai tap|Tat ca
+  //   "soTietThucHien": 1073741824
+  // }
+  const [formData, setFormData] = useState({
+    giangVienId: 0,
+    keHoachMoNhomId: keHoachMoNhom.id,
+    soNhom: 0,
+    hocKyDay: 1,
+    loai: 'Bai tap',
+    soTietThucHien: 0,
   });
+  const { listGiangVien } = useAppContext();
 
-  const onSave = () => {
-    // Validate form data here
-    if (!phanCong.giangVien_id) {
-      alert('Vui lòng điền đầy đủ thông tin!');
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    if (!formData.giangVienId || formData.giangVienId === '') {
+      alert('Vui lòng chọn giảng viên!');
       return;
     }
-
-    // Fake Xu ly o banckend
-    let keHoachData = keHoachMoNhomData.find(item => item.id == keHoach.id);
-    if (keHoachData) {
-      phanCongGiangDayData.push(phanCong);
-      keHoachData.phanCong.push(phanCong);
+    if (!formData.soNhom || formData.soNhom === '') {
+      alert('Vui lòng nhập số nhóm!');
+      return;
     }
-
-    // Close modal and refresh data
-    refresh();
-    onClose();
+    if (!formData.soTietThucHien || formData.soTietThucHien === '') {
+      alert('Vui lòng nhập số tiết thực hiện!');
+      return;
+    }
+    console.log('Form data before submission:', formData);
+    // Call the API to create the new assignment
+    (async () => {
+      const response = await KeHoachMoNhomService.createPhanCong(formData);
+      if (!response) {
+        return;
+      }
+      toast.success('Thêm phân công giảng dạy thành công');
+      setFormData({
+        giangVienId: 0,
+        keHoachMoNhomId: keHoachMoNhom.id,
+        soNhom: 1,
+        hocKyDay: 1,
+        loai: 'Bai tap',
+        soTietThucHien: 1,
+      });
+      onSave();
+    })();
   };
 
   return (
@@ -46,17 +70,12 @@ const AddPhanCongModal = ({ isOpen, onClose, keHoach, refresh }) => {
 
         <div className="grid grid-cols-3 gap-4 mb-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Nhóm</label>
+            <label className="block text-sm font-medium mb-1">Số nhóm</label>
             <input
-              type="text"
+              type="number"
               name="soNhom"
-              value={phanCong.soNhom || ''}
-              onChange={e =>
-                setPhanCong({
-                  ...phanCong,
-                  soNhom: parseInt(e.target.value),
-                })
-              }
+              value={formData.soNhom}
+              onChange={handleChange}
               className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -64,20 +83,15 @@ const AddPhanCongModal = ({ isOpen, onClose, keHoach, refresh }) => {
           <div>
             <label className="block text-sm font-medium mb-1">Mã CBGD</label>
             <select
-              name="giangVien_id"
-              value={phanCong.giangVien_id || ''}
-              onChange={e =>
-                setPhanCong({
-                  ...phanCong,
-                  giangVien_id: e.target.value,
-                })
-              }
+              name="giangVienId"
+              value={formData.giangVienId}
+              onChange={handleChange}
               className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Chọn giảng viên</option>
-              {giangVienData.map(item => (
+              {listGiangVien.map(item => (
                 <option key={item.id} value={item.id}>
-                  {item.id} - {item.tenGV}
+                  {item.id} - {item.ten}
                 </option>
               ))}
             </select>
@@ -88,26 +102,40 @@ const AddPhanCongModal = ({ isOpen, onClose, keHoach, refresh }) => {
             <input
               type="number"
               name="soTietThucHien"
-              value={phanCong.soTietThucHien || 0}
-              onChange={e =>
-                setPhanCong({
-                  ...phanCong,
-                  soTietThucHien: parseInt(e.target.value),
-                })
-              }
+              value={formData.soTietThucHien}
+              onChange={handleChange}
               className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Số tiết thực tế(fake)</label>
-            <input
-              type="number"
-              name="soTietThucTe"
-              value={phanCong.soTietThucHien || 0}
-              readOnly
+            <label className="block text-sm font-medium mb-1">Loại</label>
+            <select
+              name="loai"
+              value={formData.loai || ''}
+              onChange={handleChange}
               className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            >
+              <option value="">Chọn loại</option>
+              <option value="Ly thuyet">Lý thuyết</option>
+              <option value="Thuc hanh">Thực hành</option>
+              <option value="Bai tap">Bài tập</option>
+              <option value="Tat ca">Tất cả</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Học kỳ dạy</label>
+            <select
+              name="hocKyDay"
+              value={formData.hocKyDay || 1}
+              onChange={handleChange}
+              className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="1">Học kỳ 1</option>
+              <option value="2">Học kỳ 2</option>
+              <option value="3">Học kỳ 3</option>
+            </select>
           </div>
         </div>
 
@@ -119,7 +147,7 @@ const AddPhanCongModal = ({ isOpen, onClose, keHoach, refresh }) => {
             Hủy
           </button>
           <button
-            onClick={() => onSave(phanCong)}
+            onClick={handleSubmit}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200"
           >
             Lưu

@@ -32,8 +32,10 @@ export default function ThemKeHoachMoNhom() {
       try {
         console.log('Form data before submission:', formData);
         const response = await KeHoachMoNhomService.createKeHoachMoNhom(formData);
-        console.log('Kế hoạch mở nhóm đã được tạo:', response.data);
-
+        if (!response || !response.data) {
+          console.error('Lỗi khi tạo kế hoạch mở nhóm');
+          return;
+        }
         setFormData({
           maHocPhan: '',
           khoa: '',
@@ -50,7 +52,7 @@ export default function ThemKeHoachMoNhom() {
   };
 
   return (
-    <div className="max-w-xl mx-auto mt-10 p-6 bg-white shadow-md rounded-xl">
+    <div className="max-w-xl mx-auto mt-3 p-6 bg-white shadow-md rounded-xl">
       <h2 className="text-2xl font-bold mb-4">Thêm Kế Hoạch Mở Nhóm</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -140,6 +142,13 @@ export default function ThemKeHoachMoNhom() {
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         >
           Lưu kế hoạch
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 ml-2"
+        >
+          Hủy
         </button>
       </form>
     </div>

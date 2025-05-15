@@ -8,7 +8,7 @@ const getAll = async () => {
     return response.data;
   } catch (error) {
     console.error('Error fetching Hoc Phan data:', error);
-    throw error;
+    return null;
   }
 };
 const getById = async id => {
@@ -17,7 +17,7 @@ const getById = async id => {
     return response.data;
   } catch (error) {
     console.error('Error fetching Hoc Phan data:', error);
-    throw error;
+    return null;
   }
 };
 
