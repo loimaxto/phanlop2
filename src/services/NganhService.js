@@ -11,13 +11,10 @@ export const getListNganh = async (params = {}) => {
 }
 
 export const getListAll = async () => {
-    try {
-        const response = await axiosInstance.get('/api/v1/nganh/get-list')
-        return response.data
-    } catch (error) {
-        throw error
-    }
-}
+  const res = await axiosInstance.get('/api/v1/nganh/get-list');
+  return res.data.data; 
+};
+
 
 // Tạo mới thông tin chung (POST)
 export const createNganh = async (data) => {

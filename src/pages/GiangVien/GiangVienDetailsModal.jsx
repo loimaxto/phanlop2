@@ -1,29 +1,29 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@mui/material';
+import { getPhanCongByGiangVienId } from '@/services/GiangVienService';
+;
 
 const GiangVienDetailsModal = ({ giangVien, onClose }) => {
   const [phanCongList, setPhanCongList] = useState([]);
 
-  useEffect(() => {
-    const fetchPhanCong = async () => {
-      if (!giangVien?.id) return;
+useEffect(() => {
+  const fetchPhanCong = async () => {
+    if (!giangVien?.id) return;
 
-      try {
-        const response = await fetch(`http://localhost:5000/api/phanconggiangday/${giangVien.id}`);
-        const data = await response.json();
-        setPhanCongList(data);
-      } catch (err) {
-        console.error('Lỗi khi gọi API phân công:', err);
-      }
-    };
+    try {
+      const data = await getPhanCongByGiangVienId(giangVien.id);
+      setPhanCongList(data);
+    } catch (err) {
+      console.error('Lỗi khi gọi API phân công:', err);
+    }
+  };
 
-    fetchPhanCong();
-  }, [giangVien]);
+  fetchPhanCong();
+}, [giangVien]);
 
   if (!giangVien) return null;
 
-  const tongTietGiangDay = phanCongList.reduce((sum, item) =>
-    sum + (Number(item.hk1) + Number(item.hk2) + Number(item.hk3)) * Number(item.SoTiet), 0);
+
   
 
 
@@ -32,7 +32,7 @@ const GiangVienDetailsModal = ({ giangVien, onClose }) => {
       <div className="flex justify-between items-center mb-4">
         <Button variant="contained" sx={{ backgroundColor: 'red' }} onClick={onClose}>X</Button>
         <div className="text-lg font-semibold">
-          Giảng viên: <strong>{giangVien.tenGV}</strong>
+          Giảng viên: <strong>{giangVien.ten}</strong>
         </div>
       </div>
 
@@ -62,15 +62,15 @@ const GiangVienDetailsModal = ({ giangVien, onClose }) => {
           <tbody className="text-center">
             {phanCongList.map((item, index) => (
               <tr key={index}>
-                <td className="border p-2">{item.TenHP}</td>
-                <td className="border p-2">{item.MAHP}</td>
-                <td className="border p-2">{item.SoTC}</td>
-                <td className="border p-2">{item.SoTiet}</td>
+                <td className="border p-2">{item.tenHP}</td>
+                <td className="border p-2">{item.maHP}</td>
+                <td className="border p-2">{item.soTinChi}</td>
+                <td className="border p-2">{item.soTiet}</td>
                 <td className="border p-2">{Number(item.hk1) + Number(item.hk2) + Number(item.hk3)}</td>
                 <td className="border p-2">{item.hk1}</td>
                 <td className="border p-2">{item.hk2}</td>
                 <td className="border p-2">{item.hk3}</td>
-                <td className="border p-2">{(Number(item.hk1) + Number(item.hk2) + Number(item.hk3)) * Number(item.SoTiet)}</td>
+                <td className="border p-2">{(Number(item.hk1) + Number(item.hk2) + Number(item.hk3)) * Number(item.soTiet)}</td>
                 {index === 0 && (
                   <>
                     <td rowSpan={phanCongList.length} className="border p-2"></td>
@@ -84,7 +84,7 @@ const GiangVienDetailsModal = ({ giangVien, onClose }) => {
           <td colSpan="8" className="border p-2 text-center font-bold">Tổng cộng</td>
           <td className="border p-2">
             {phanCongList.reduce((sum, item) => 
-              sum + (Number(item.hk1) + Number(item.hk2) + Number(item.hk3)) * Number(item.SoTiet), 0)}
+              sum + (Number(item.hk1) + Number(item.hk2) + Number(item.hk3)) * Number(item.soTiet), 0)}
           </td>
           <td className="border p-2 font-bold" rowSpan="1"> {/* Hoặc để trống nếu bạn không cần tính */}
             0
@@ -94,7 +94,7 @@ const GiangVienDetailsModal = ({ giangVien, onClose }) => {
           </td>
           <td className="border p-2 font-bold" rowSpan="1">
           {phanCongList.reduce((sum, item) => 
-              sum + (Number(item.hk1) + Number(item.hk2) + Number(item.hk3)) * Number(item.SoTiet), 0)}
+              sum + (Number(item.hk1) + Number(item.hk2) + Number(item.hk3)) * Number(item.soTiet), 0)}
           </td>
         </tr>
 

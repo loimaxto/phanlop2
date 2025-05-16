@@ -1,16 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const GiangVienEditModal = ({ giangVien, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
-    tenGV: giangVien.tenGV,
+    ten: giangVien.ten,
     namSinh: giangVien.namSinh,
     chucDanh: giangVien.chucDanh,
     trinhDo: giangVien.trinhDo,
   });
 
+useEffect(() => {
+  console.log("🟢 Modal mở - dữ liệu ban đầu:", formData);
+}, []);
+
+
+
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
   };
 
   const handleSubmit = async () => {
@@ -18,7 +26,7 @@ const GiangVienEditModal = ({ giangVien, onClose, onSuccess }) => {
     if (!confirmUpdate) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/giangvien/${giangVien.id}`, {
+      const res = await fetch(`http://localhost:8080/api/giangvien/${giangVien.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -45,8 +53,8 @@ const GiangVienEditModal = ({ giangVien, onClose, onSuccess }) => {
         <div className="space-y-3">
           <input
             type="text"
-            name="tenGV"
-            value={formData.tenGV}
+            name="ten"
+            value={formData.ten}
             onChange={handleChange}
             className="input input-bordered w-full"
             placeholder="Họ tên giảng viên"
