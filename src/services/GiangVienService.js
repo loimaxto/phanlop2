@@ -6,6 +6,12 @@ export const getGiangVienList = async (params = {}) => {
   return response.data;
 };
 
+// Lấy danh sách giảng viên theo khoa để export
+export const getGiangVienExport = async (khoa) => {
+  const response = await axiosInstance.get(`/api/giangvien/export/${encodeURIComponent(khoa)}`);
+  return response.data;
+};
+
 // Lấy các nhóm dạy của giáo viên
 export const getPhanCongByGiangVienId = async (id) => {
   const response = await axiosInstance.get(`/api/phanconggiangday/${id}`);
@@ -20,9 +26,10 @@ export const getGiangVienById = async (id) => {
 
 // Tạo mới giảng viên (POST)
 export const createGiangVien = async (data) => {
-  const response = await axiosInstance.post('/api/giangvien', data);
+  const response = await axiosInstance.post('/api/giangvien/them', data);
   return response.data;
 };
+
 
 // Cập nhật toàn bộ giảng viên theo ID (PUT)
 export const updateGiangVien = async (id, data) => {
@@ -54,8 +61,6 @@ export const getGiangVienByKhoa = async (khoa) => {
   return response.data;
 };
 
-// Lấy thông tin user
-export const getuser = async () => {
-  const response = await axiosInstance.get(`/api/user_gv`);
-  return response.data;
-};
+
+
+
