@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { getPhanCongByGiangVienId } from '@/services/GiangVienService'; 
+
 
 const GiangVienEditModal = ({ giangVien, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -9,8 +11,21 @@ const GiangVienEditModal = ({ giangVien, onClose, onSuccess }) => {
   });
 
 useEffect(() => {
-  console.log("🟢 Modal mở - dữ liệu ban đầu:", formData);
-}, []);
+  const fetchData = async () => {
+    try {
+      const data = await getPhanCongByGiangVienId(giangVienId);
+      console.log("Phân công giảng dạy:", data);
+      setPhanCongList(data); 
+    } catch (err) {
+      console.error("Lỗi khi lấy phân công:", err);
+    }
+  };
+
+  if (isOpen) {
+    fetchData();
+  }
+}, [isOpen]);
+
 
 
 
