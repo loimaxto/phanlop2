@@ -1,90 +1,157 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { keHoachGiangDayData, phanCongGiangDayData } from '../../dumpData';
-import AddKeHoachModal from './AddKeHoachModal';
+import React, { useState, useEffect, useCallback } from 'react';
+import { keHoachMoNhomData } from '../../dumpData';
 import EditKeHoachModal from './EditKeHoachModal';
 import AddPhanCongModal from './AddPhanCongModal';
 import EditPhanCongModal from './EditPhanCongModal';
+import KeHoachMoNhomService from '../../services/KeHoachMoNhomService';
+import { printKeHoachMoNhom, printKeHoachMoNhomTongHop } from '../../services/print-service';
+import { NavLink } from 'react-router';
+import { toast } from 'react-toastify';
+import debounce from 'lodash/debounce';
 
 const KeHoachGiangDayPage = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedPhanCong, setSelectedPhanCong] = useState(null);
-  const [selectedKeHoach, setSelectedKeHoach] = useState(null);
-  const [modalMode, setModalMode] = useState('add'); // add, edit, addPhanCong, editPhanCong
-  const [selectedHocKy, setSelectedHocKy] = useState('1');
-  const [selectedNamHoc, setSelectedNamHoc] = useState('');
-  const [needRefresh, setNeedRefresh] = useState(true);
-  // Dữ liệu mẫu cho kế hoạch giảng dạy
-  const [keHoachData, setKeHoachData] = useState(keHoachGiangDayData);
+  // Modal state
+  const [modal, setModal] = useState({
+    isOpen: false,
+    mode: 'add',
+    keHoachMoNhom: null,
+    phanCong: null,
+  });
 
-  // khoi tao combobox năm học
+  // State for search and data
+  const [selectedNamHoc, setSelectedNamHoc] = useState('');
+  const [keyword, setKeyword] = useState('');
+  const [needRefresh, setNeedRefresh] = useState(true);
+  const [keHoachData, setKeHoachData] = useState(keHoachMoNhomData);
+  const [isPrintMenuOpen, setIsPrintMenuOpen] = useState(false);
+
+  // Initialize academic year
   useEffect(() => {
     const currentYear = new Date().getFullYear();
-    setSelectedNamHoc(currentYear);
+    setSelectedNamHoc(`${currentYear - 1}-${currentYear}`);
   }, []);
 
-  // Lấy dữ liệu kế hoạch giảng dạy từ dumpData.js
-  // Fake backend
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    debounce(async (keyword, namHoc) => {
+      try {
+        const data = await KeHoachMoNhomService.searchKeHoachMoNhom(keyword, namHoc);
+        setKeHoachData(data);
+      } catch (error) {
+        toast.error('Lỗi khi tìm kiếm kế hoạch mở nhóm');
+      }
+    }, 500),
+    []
+  );
+
+  // Fetch data when keyword, namHoc, or needRefresh changes
   useEffect(() => {
-    if (needRefresh) {
-      keHoachGiangDayData;
-      setNeedRefresh(false);
-      setKeHoachData(keHoachGiangDayData);
-    }
-  }, [needRefresh]);
-
-  //Fake backend
-  useEffect(() => {
-    let newKeHoachData = keHoachGiangDayData.filter(keHoach => {
-      return keHoach.hocKy == selectedHocKy && keHoach.namHoc == selectedNamHoc;
-    });
-    setKeHoachData(newKeHoachData);
-  }, [selectedHocKy, selectedNamHoc]);
-
-  const openAddKeHoachModal = () => {
-    setModalMode('add');
-    setIsModalOpen(true);
-  };
-
-  // Xử lý xóa, ok
-  const handleDelete = id => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa kế hoạch này?')) {
-      //fake backend
-      keHoachData.splice(
-        keHoachData.findIndex(item => item.id == id),
-        1
-      );
-      setNeedRefresh(true);
-    }
-  };
-
-  // Xử lý xóa phân công
-  const handleDeletePhanCong = (keHoachId, phanCongId) => {
-    ({ keHoachId, phanCongId });
-    if (window.confirm('Bạn có chắc chắn muốn xóa phân công này?')) {
-      let keHoachData = keHoachGiangDayData.find(item => item.id == keHoachId);
-      if (keHoachData) {
-        let keHoachPhanCongIndex = keHoachData.phanCong.findIndex(item => item.id == phanCongId);
-        let phanCongIndex = phanCongGiangDayData.findIndex(item => item.id == phanCongId);
-        phanCongGiangDayData.find(item => item.id == phanCongId);
-        if (keHoachPhanCongIndex !== -1 && phanCongIndex !== -1) {
-          keHoachData.phanCong.splice(keHoachPhanCongIndex, 1);
-          phanCongGiangDayData.splice(phanCongIndex, 1);
-          setNeedRefresh(true);
-        }
+    if (selectedNamHoc) {
+      debouncedSearch(keyword, selectedNamHoc);
+      if (needRefresh) {
+        setNeedRefresh(false);
       }
     }
+  }, [keyword, selectedNamHoc, needRefresh, debouncedSearch]);
+
+  // Handle delete ke hoach
+  const handleDeleteKeHoachMoNhom = index => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa kế hoạch mở nhóm này?')) {
+      (async () => {
+        let keHoach = keHoachData[index];
+        let response = await KeHoachMoNhomService.deleteKeHoachMoNhom(keHoach.id);
+        if (response) {
+          toast.success('Xóa kế hoạch mở nhóm thành công');
+          setKeHoachData(prev => prev.filter((_, i) => i !== index));
+        }
+      })();
+    }
   };
 
-  const getCurrentAndNextYear = () => {
+  // Handle delete phan cong
+  const handleDeletePhanCong = (keHoachIndex, phanCongIndex) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa phân công này?')) {
+      (async () => {
+        let keHoach = keHoachData[keHoachIndex];
+        let phanCong = keHoach.phanCongGiangDay[phanCongIndex];
+        let response = await KeHoachMoNhomService.deletePhanCong(phanCong.id);
+        if (response) {
+          toast.success('Xóa phân công thành công');
+          setKeHoachData(prev => {
+            let newKeHoachData = [...prev];
+            newKeHoachData[keHoachIndex].phanCongGiangDay = newKeHoachData[
+              keHoachIndex
+            ].phanCongGiangDay.filter((_, i) => i !== phanCongIndex);
+            return newKeHoachData;
+          });
+        }
+      })();
+    }
+  };
+
+  // Handle edit ke hoach
+  const handleClickEditKeHoach = keHoachIndex => {
+    setModal({
+      isOpen: true,
+      mode: 'edit',
+      keHoachMoNhom: keHoachData[keHoachIndex],
+    });
+  };
+
+  // Handle add phan cong
+  const handleClickThemPhanCong = keHoachIndex => {
+    setModal({
+      isOpen: true,
+      mode: 'addPhanCong',
+      keHoachMoNhom: keHoachData[keHoachIndex],
+    });
+  };
+
+  // Handle edit phan cong
+  const handleClickEditPhanCong = (keHoachIndex, phanCongIndex) => {
+    setModal({
+      isOpen: true,
+      mode: 'editPhanCong',
+      keHoachMoNhom: keHoachData[keHoachIndex],
+      phanCong: keHoachData[keHoachIndex].phanCongGiangDay[phanCongIndex],
+    });
+  };
+
+  // Get academic year options
+  const getOptionsNamHoc = () => {
     const currentYear = new Date().getFullYear();
-    return [`${currentYear - 1}`, `${currentYear}`, `${currentYear + 1}`];
+    const namHocOptions = [];
+    for (let i = currentYear - 3; i <= currentYear + 1; i++) {
+      namHocOptions.push(`${i}-${i + 1}`);
+    }
+    return namHocOptions;
   };
 
-  // Đóng modal
+  // Close modal
   const handleCloseModal = () => {
-    setIsModalOpen(false);
+    setModal({
+      isOpen: false,
+      mode: 'add',
+      keHoachMoNhom: null,
+      phanCong: null,
+    });
+  };
+
+  // Save modal and refresh
+  const handleSaveModal = () => {
+    setNeedRefresh(true);
+    handleCloseModal();
+  };
+
+  // Handle print ke hoach tong hop
+  const handlePrintKeHoachMoNhomTongHop = async () => {
+    const response = await KeHoachMoNhomService.getTongHopKeHoachMoNhom(selectedNamHoc);
+    if (response) {
+      printKeHoachMoNhomTongHop(response, selectedNamHoc);
+      toast.success('In kế hoạch mở nhóm tổng hợp thành công');
+    }
   };
 
   return (
@@ -92,35 +159,9 @@ const KeHoachGiangDayPage = () => {
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Kế hoạch mở nhóm & Phân công giảng dạy</h1>
-          <div className="flex space-x-4">
-            <div className="flex items-center space-x-2">
-              <label className="font-medium">Học kỳ:</label>
-              <select
-                value={selectedHocKy}
-                onChange={e => setSelectedHocKy(e.target.value)}
-                className="border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="1">HK1</option>
-                <option value="2">HK2</option>
-                <option value="3">HK3</option>
-              </select>
-            </div>
-            <div className="flex items-center space-x-2">
-              <label className="font-medium">Năm học:</label>
-              <select
-                value={selectedNamHoc}
-                onChange={e => setSelectedNamHoc(e.target.value)}
-                className="border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {getCurrentAndNextYear().map(year => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <button
-              onClick={openAddKeHoachModal}
+          <div className="flex space-x-4 items-center">
+            <NavLink
+              to="/ke-hoach-mo-nhom/create"
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center transition-colors duration-200"
             >
               <svg
@@ -136,11 +177,77 @@ const KeHoachGiangDayPage = () => {
                 />
               </svg>
               Thêm kế hoạch
-            </button>
+            </NavLink>
           </div>
         </div>
 
         <div className="overflow-x-auto">
+          <div className="flex items-center space-x-2 mb-4">
+            <input
+              type="text"
+              placeholder="Tìm kiếm theo mã hoặc tên học phần..."
+              value={keyword}
+              onChange={e => setKeyword(e.target.value)}
+              className="border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+
+            <label className="font-medium">Năm học:</label>
+            <select
+              value={selectedNamHoc}
+              onChange={e => setSelectedNamHoc(e.target.value)}
+              className="border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {getOptionsNamHoc().map(namHoc => (
+                <option key={namHoc} value={namHoc}>
+                  {namHoc}
+                </option>
+              ))}
+            </select>
+            <div className="relative inline-block text-left">
+              <button
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md flex items-center transition-colors duration-200"
+                onClick={() => setIsPrintMenuOpen(!isPrintMenuOpen)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="size-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"
+                  />
+                </svg>
+                <span className="ml-2">In</span>
+              </button>
+              {isPrintMenuOpen && (
+                <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
+                  <button
+                    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                    onClick={() => {
+                      setIsPrintMenuOpen(false);
+                      printKeHoachMoNhom(keHoachData);
+                    }}
+                  >
+                    In kế hoạch
+                  </button>
+                  <button
+                    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                    onClick={() => {
+                      setIsPrintMenuOpen(false);
+                      handlePrintKeHoachMoNhomTongHop();
+                    }}
+                  >
+                    In tổng hợp
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
           <table className="w-full border-collapse text-sm">
             <thead>
               <tr className="bg-gray-100 text-left">
@@ -171,20 +278,8 @@ const KeHoachGiangDayPage = () => {
                 <th className="p-2 border text-center" rowSpan="2">
                   SLSV/ Nhóm
                 </th>
-                <th className="p-2 border text-center" rowSpan="2">
-                  Nhóm
-                </th>
-                <th className="p-2 border text-center" rowSpan="2">
-                  Mã CBGD
-                </th>
-                <th className="p-2 border text-center" rowSpan="2">
-                  Họ và tên CBGD
-                </th>
-                <th className="p-2 border text-center" rowSpan="2">
-                  Số tiết thực hiện
-                </th>
-                <th className="p-2 border text-center" rowSpan="2">
-                  Số tiết thực tế
+                <th className="p-2 border text-center" colSpan="5">
+                  Phân công giảng dạy
                 </th>
                 <th className="p-2 border text-center" rowSpan="2">
                   Thao tác
@@ -195,11 +290,26 @@ const KeHoachGiangDayPage = () => {
                 <th className="p-2 border text-center">TT</th>
                 <th className="p-2 border text-center">TH</th>
                 <th className="p-2 border text-center">TC</th>
+                <th className="p-2 border text-center" colSpan="1" rowSpan="1">
+                  Nhóm
+                </th>
+                <th className="p-2 border text-center" colSpan="1" rowSpan="1">
+                  Mã CBGD
+                </th>
+                <th className="p-2 border text-center" rowSpan="1">
+                  Họ và tên CBGD
+                </th>
+                <th className="p-2 border text-center" rowSpan="1">
+                  Số tiết thực hiện
+                </th>
+                <th className="p-2 border text-center" rowSpan="1">
+                  Số tiết thực tế
+                </th>
               </tr>
             </thead>
             <tbody>
               {keHoachData.map((keHoach, keHoachIndex) => {
-                const rowSpan = keHoach.phanCong.length || 1;
+                const rowSpan = keHoach.phanCongGiangDay.length || 1;
                 return (
                   <React.Fragment key={keHoach.id}>
                     <tr>
@@ -207,11 +317,7 @@ const KeHoachGiangDayPage = () => {
                         <div className="flex justify-end items-center space-x-2 ml-2">
                           <div className="flex rounded-lg p-1 ">
                             <button
-                              onClick={() => {
-                                setSelectedKeHoach(keHoach);
-                                setModalMode('edit');
-                                setIsModalOpen(true);
-                              }}
+                              onClick={() => handleClickEditKeHoach(keHoachIndex)}
                               className="p-1 rounded-l-md bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 transition-colors"
                               title="Sửa kế hoạch"
                             >
@@ -225,7 +331,7 @@ const KeHoachGiangDayPage = () => {
                               </svg>
                             </button>
                             <button
-                              onClick={() => handleDelete(keHoach.id)}
+                              onClick={() => handleDeleteKeHoachMoNhom(keHoachIndex)}
                               className="p-1 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 transition-colors"
                               title="Xóa kế hoạch"
                             >
@@ -243,11 +349,7 @@ const KeHoachGiangDayPage = () => {
                               </svg>
                             </button>
                             <button
-                              onClick={() => {
-                                setSelectedKeHoach(keHoach);
-                                setModalMode('addPhanCong');
-                                setIsModalOpen(true);
-                              }}
+                              onClick={() => handleClickThemPhanCong(keHoachIndex)}
                               className="p-1 rounded-r-md bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-700 transition-colors"
                               title="Thêm phân công"
                             >
@@ -268,8 +370,8 @@ const KeHoachGiangDayPage = () => {
                         </div>
                       </td>
                     </tr>
-                    {keHoach.phanCong.length > 0 ? (
-                      keHoach.phanCong.map((phanCong, phanCongIndex) => (
+                    {keHoach.phanCongGiangDay.length > 0 ? (
+                      keHoach.phanCongGiangDay.map((phanCong, phanCongIndex) => (
                         <tr key={`${keHoach.id}-${phanCongIndex}`} className="hover:bg-gray-50">
                           {phanCongIndex === 0 && (
                             <>
@@ -277,7 +379,7 @@ const KeHoachGiangDayPage = () => {
                                 {keHoachIndex + 1}
                               </td>
                               <td className="p-2 border" rowSpan={rowSpan}>
-                                {keHoach.hocPhan.maHP}
+                                {keHoach.hocPhan.maHocPhan}
                               </td>
                               <td className="p-2 border" rowSpan={rowSpan}>
                                 {keHoach.hocPhan.tenHocPhan}
@@ -292,39 +394,34 @@ const KeHoachGiangDayPage = () => {
                                 {keHoach.hocPhan.soTietLyThuyet}
                               </td>
                               <td className="p-2 border text-center" rowSpan={rowSpan}>
-                                {keHoach.hocPhan.soTietThucTap}
+                                {keHoach.hocPhan.soTietBaiTap}
                               </td>
                               <td className="p-2 border text-center" rowSpan={rowSpan}>
                                 {keHoach.hocPhan.soTietThucHanh}
                               </td>
                               <td className="p-2 border text-center" rowSpan={rowSpan}>
-                                {keHoach.hocPhan.soTietTong}
+                                {keHoach.hocPhan.soTietTongCong}
                               </td>
                               <td className="p-2 border text-center" rowSpan={rowSpan}>
-                                {keHoach.heSoHP.toFixed(2)}
+                                {keHoach.heSo.toFixed(2)}
                               </td>
                               <td className="p-2 border text-center" rowSpan={rowSpan}>
                                 {keHoach.tongSoNhom}
                               </td>
                               <td className="p-2 border text-center" rowSpan={rowSpan}>
-                                {keHoach.slsvNhom}
+                                {keHoach.soSinhVien1Nhom}
                               </td>
                             </>
                           )}
                           <td className="p-2 border text-center">{phanCong.nhom}</td>
-                          <td className="p-2 border text-center">{phanCong.maCBGD}</td>
-                          <td className="p-2 border">{phanCong.tenCBGD}</td>
+                          <td className="p-2 border text-center">{phanCong.giangVien.id}</td>
+                          <td className="p-2 border">{phanCong.giangVien.ten}</td>
                           <td className="p-2 border text-center">{phanCong.soTietThucHien}</td>
                           <td className="p-2 border text-center">{phanCong.soTietThucTe}</td>
                           <td className="p-2 border">
                             <div className="flex justify-center space-x-1">
                               <button
-                                onClick={() => {
-                                  setSelectedKeHoach(keHoach);
-                                  setSelectedPhanCong(phanCong);
-                                  setModalMode('editPhanCong');
-                                  setIsModalOpen(true);
-                                }}
+                                onClick={() => handleClickEditPhanCong(keHoachIndex, phanCongIndex)}
                                 className="p-1 rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 transition-colors"
                                 title="Sửa phân công"
                               >
@@ -338,7 +435,7 @@ const KeHoachGiangDayPage = () => {
                                 </svg>
                               </button>
                               <button
-                                onClick={() => handleDeletePhanCong(keHoach.id, phanCong.id)}
+                                onClick={() => handleDeletePhanCong(keHoachIndex, phanCongIndex)}
                                 className="p-1 rounded-md bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 transition-colors"
                                 title="Xóa phân công"
                               >
@@ -362,17 +459,17 @@ const KeHoachGiangDayPage = () => {
                     ) : (
                       <tr className="hover:bg-gray-50">
                         <td className="p-2 border text-center">{keHoachIndex + 1}</td>
-                        <td className="p-2 border">{keHoach.hocPhan.maHP}</td>
+                        <td className="p-2 border">{keHoach.hocPhan.maHocPhan}</td>
                         <td className="p-2 border">{keHoach.hocPhan.tenHocPhan}</td>
                         <td className="p-2 border text-center">{keHoach.hocPhan.soTinChi}</td>
                         <td className="p-2 border">{keHoach.khoa}</td>
                         <td className="p-2 border text-center">{keHoach.hocPhan.soTietLyThuyet}</td>
-                        <td className="p-2 border text-center">{keHoach.hocPhan.soTietThucTap}</td>
+                        <td className="p-2 border text-center">{keHoach.hocPhan.soTietBaiTap}</td>
                         <td className="p-2 border text-center">{keHoach.hocPhan.soTietThucHanh}</td>
-                        <td className="p-2 border text-center">{keHoach.hocPhan.soTietTong}</td>
-                        <td className="p-2 border text-center">{keHoach.heSoHP.toFixed(2)}</td>
+                        <td className="p-2 border text-center">{keHoach.hocPhan.soTietTongCong}</td>
+                        <td className="p-2 border text-center">{keHoach.heSo.toFixed(2)}</td>
                         <td className="p-2 border text-center">{keHoach.tongSoNhom}</td>
-                        <td className="p-2 border text-center">{keHoach.slsvNhom}</td>
+                        <td className="p-2 border text-center">{keHoach.soSinhVien1Nhom}</td>
                         <td className="p-2 border text-center" colSpan="6"></td>
                       </tr>
                     )}
@@ -384,34 +481,26 @@ const KeHoachGiangDayPage = () => {
         </div>
       </div>
 
-      {/* Sử dụng các modal component */}
-      <AddKeHoachModal
-        isOpen={isModalOpen && modalMode === 'add'}
-        onClose={handleCloseModal}
-        refresh={() => setNeedRefresh(true)}
-      />
-
       <EditKeHoachModal
-        isOpen={isModalOpen && modalMode === 'edit'}
+        isOpen={modal.isOpen && modal.mode == 'edit'}
+        keHoachMoNhom={modal.keHoachMoNhom}
+        onSave={handleSaveModal}
         onClose={handleCloseModal}
-        keHoach={selectedKeHoach}
-        refresh={() => setNeedRefresh(true)}
       />
 
       <AddPhanCongModal
-        isOpen={isModalOpen && modalMode === 'addPhanCong'}
+        isOpen={modal.isOpen && modal.mode == 'addPhanCong'}
+        keHoachMoNhom={modal.keHoachMoNhom}
+        onSave={handleSaveModal}
         onClose={handleCloseModal}
-        keHoach={selectedKeHoach}
-        refresh={() => setNeedRefresh(true)}
       />
 
       <EditPhanCongModal
-        isOpen={isModalOpen && modalMode === 'editPhanCong'}
+        isOpen={modal.isOpen && modal.mode == 'editPhanCong'}
+        keHoachMoNhom={modal.keHoachMoNhom}
+        phanCong={modal.phanCong}
+        onSave={handleSaveModal}
         onClose={handleCloseModal}
-        keHoach={selectedKeHoach}
-        phanCong={selectedPhanCong}
-        setPhanCong={setSelectedPhanCong}
-        refresh={() => setNeedRefresh(true)}
       />
     </div>
   );

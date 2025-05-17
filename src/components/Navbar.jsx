@@ -33,27 +33,15 @@ export default function NavBar() {
           </li>
           <li>
             <NavLink
-              to="/ke-hoach-day-hoc/1"
+              to="/ke-hoach-mo-nhom"
               className={({ isActive }) => (isActive ? 'bg-blue-200' : '')}
             >
               <span className="icon-[tabler--home] size-5"></span>
-              Kế hoạch dạy học demo
+              Kế hoạch mở nhóm
             </NavLink>
           </li>
           <li>
-            <NavLink
-              to="/ke-hoach-giang-day"
-              className={({ isActive }) => (isActive ? 'bg-blue-200' : '')}
-            >
-              <span className="icon-[tabler--home] size-5"></span>
-              Kế hoạch giảng dạy
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/giang-vien"
-              className={({ isActive }) => (isActive ? 'bg-blue-200' : '')}
-            >
+            <NavLink to="/giang-vien" className={({ isActive }) => (isActive ? 'bg-blue-200' : '')}>
               <span className="icon-[tabler--home] size-5"></span>
               Giảng viên
             </NavLink>
