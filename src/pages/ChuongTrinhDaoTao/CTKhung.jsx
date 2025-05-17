@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getChuongTrinhKhungByThongTinChungId } from '@services/ThongTinChungService';
+import { NavLink } from 'react-router';
 
 function CTKhung({ id, isOpen, onClose }) {
   const [cTKhung, setCTKhung] = useState([]);
@@ -169,6 +170,9 @@ function CTKhung({ id, isOpen, onClose }) {
         </table>
 
         <div className="text-right mt-4">
+          <NavLink className="btn btn-primary me-4" to={`/ctdt/${id}`}>
+            Xem chi tiết
+          </NavLink>
           <button className="btn btn-outline" onClick={onClose}>
             Đóng
           </button>

@@ -26,8 +26,8 @@ ReactDOM.createRoot(root).render(
           <Route path="/hoc-phan" element={<HocPhanPage />} />
           <Route path="/de-cuong-chi-tiet" element={<DeCuongPage />} />
           <Route path="/ctdt" element={<CurriculumPage />} />
+          <Route path="/ctdt/:thongTinChungId" element={<KeHoachDayHocPage />} />
           <Route path="/create-ctdt" element={<CreateCurriculumPage />} />
-          <Route path="/ke-hoach-day-hoc/:thongTinChungId" element={<KeHoachDayHocPage />} />
           <Route path="/ke-hoach-mo-nhom" element={<KeHoachMoNhomPage />} />
           <Route path="/ke-hoach-mo-nhom/create" element={<CreateKeHoachMoNhom />} />
           <Route path="/giang-vien" element={<GiangVienPage />} />
