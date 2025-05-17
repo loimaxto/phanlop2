@@ -18,7 +18,7 @@ const createKeHoachMoNhom = async data => {
     return response.data;
   } catch (error) {
     console.error('Error creating Ke Hoach Mo Nhom:', error);
-    toast.error('Lỗi khi tạo kế hoạch mở nhóm\n' + error.response?.data?.message);
+    toast.error('Lỗi: ' + error.response?.data?.message);
     throw error;
   }
 };
@@ -29,7 +29,7 @@ const updateKeHoachMoNhom = async (id, data) => {
     return response.data;
   } catch (error) {
     console.error('Error updating Ke Hoach Mo Nhom:', error);
-    toast.error('Lỗi khi cập nhật kế hoạch mở nhóm');
+    toast.error('Lỗi: ' + error.response?.data?.message);
     return null;
   }
 };
@@ -80,9 +80,14 @@ const createPhanCong = async data => {
   }
 };
 
-const getAll = async () => {
+const searchKeHoachMoNhom = async (keyword, namHoc) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/api/v1/ke-hoach-mo-nhom`);
+    const response = await axios.get(`${API_BASE_URL}/api/v1/ke-hoach-mo-nhom`, {
+      params: {
+        keyword: keyword,
+        namHoc: namHoc,
+      },
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching Ke Hoach Mo Nhom data:', error);
@@ -90,13 +95,29 @@ const getAll = async () => {
   }
 };
 
+const getTongHopKeHoachMoNhom = async namHoc => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/v1/ke-hoach-mo-nhom/tongHopMauIn`, {
+      params: {
+        namHoc: namHoc,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching Tong Hop Ke Hoach Mo Nhom data:', error);
+    toast.error('Lỗi khi lấy tổng hợp kế hoạch mở nhóm');
+    return null;
+  }
+};
+
 export default {
   getById,
-  getAll,
+  searchKeHoachMoNhom,
   createKeHoachMoNhom,
   updateKeHoachMoNhom,
   deleteKeHoachMoNhom,
   deletePhanCong,
   updatePhanCong,
   createPhanCong,
+  getTongHopKeHoachMoNhom,
 };
