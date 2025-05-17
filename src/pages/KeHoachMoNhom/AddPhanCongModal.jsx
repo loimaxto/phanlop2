@@ -14,6 +14,7 @@ const AddPhanCongModal = ({ isOpen, onClose, keHoachMoNhom, onSave }) => {
   //   "loai": "Bai tap",//Ly thuyet|Thuc hanh|Bai tap|Tat ca
   //   "soTietThucHien": 1073741824
   // }
+  const hocPhan = keHoachMoNhom.hocPhan;
   const [formData, setFormData] = useState({
     giangVienId: 0,
     keHoachMoNhomId: keHoachMoNhom.id,
@@ -26,21 +27,46 @@ const AddPhanCongModal = ({ isOpen, onClose, keHoachMoNhom, onSave }) => {
 
   const handleChange = e => {
     const { name, value } = e.target;
+    if (name === 'soNhom') {
+      //tinh so tiet thuc hien tu loai tuong ung voi so tiet tu hoc phan
+      const map = {
+        'Bai tap': hocPhan.soTietBaiTap,
+        'Ly thuyet': hocPhan.soTietLyThuyet,
+        'Thuc hanh': hocPhan.soTietThucHanh,
+        'Tat ca': hocPhan.soTietTongCong,
+      };
+      const soTietThucHien = map[formData.loai] * value;
+      setFormData(prev => ({ ...prev, soTietThucHien, [name]: value }));
+      return;
+    }
+    if (name === 'loai') {
+      //tinh so tiet thuc hien tu loai tuong ung voi so tiet tu hoc phan
+      const map = {
+        'Bai tap': hocPhan.soTietBaiTap,
+        'Ly thuyet': hocPhan.soTietLyThuyet,
+        'Thuc hanh': hocPhan.soTietThucHanh,
+        'Tat ca': hocPhan.soTietTongCong,
+      };
+      const soTietThucHien = map[value] * formData.soNhom;
+      setFormData(prev => ({ ...prev, soTietThucHien, [name]: value }));
+      return;
+    }
+
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = e => {
     e.preventDefault();
     if (!formData.giangVienId || formData.giangVienId === '') {
-      alert('Vui lòng chọn giảng viên!');
+      toast.error('Vui lòng chọn giảng viên!');
       return;
     }
     if (!formData.soNhom || formData.soNhom === '') {
-      alert('Vui lòng nhập số nhóm!');
+      toast.error('Vui lòng nhập số nhóm!');
       return;
     }
     if (!formData.soTietThucHien || formData.soTietThucHien === '') {
-      alert('Vui lòng nhập số tiết thực hiện!');
+      toast.error('Số tiết thực hiện phải lớn hơn 0!');
       return;
     }
     console.log('Form data before submission:', formData);
@@ -103,8 +129,8 @@ const AddPhanCongModal = ({ isOpen, onClose, keHoachMoNhom, onSave }) => {
               type="number"
               name="soTietThucHien"
               value={formData.soTietThucHien}
-              onChange={handleChange}
-              className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              readOnly
+              className="border border-gray-300 rounded-md px-3 py-2 w-full bg-gray-100 text-gray-500 cursor-not-allowed focus:ring-0 focus:outline-none"
             />
           </div>
 

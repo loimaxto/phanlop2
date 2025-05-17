@@ -212,7 +212,13 @@ export const printKeHoachDayHoc = (
       },
     },
     { content: totalAll, styles: { halign: 'center', fillColor: [180, 180, 180] } },
-    ...Array(13).fill({ content: '', styles: { fillColor: [180, 180, 180] } }),
+    {
+      content: '',
+      colSpan: 13,
+      styles: {
+        fillColor: [180, 180, 180],
+      },
+    },
   ]);
 
   const tableHead = [
@@ -386,8 +392,7 @@ export const printKeHoachMoNhomTheoHocKy = (hocKy, keHoachData) => {
   doc.save(`ke-hoach-mo-nhom-hoc-ky-${hocKy}.pdf`);
 };
 
-// // CHUA THAY DUNG
-export const printKeHoachMoNhomTongHop = (
+export const printKeHoachMoNhom = (
   keHoachData,
   schoolName = 'TRƯỜNG ĐẠI HỌC XYZ',
   departmentName = 'KHOA ABC',
@@ -531,11 +536,182 @@ export const printKeHoachMoNhomTongHop = (
   doc.setFont('times', 'normal');
   doc.text('(Ký và ghi rõ họ tên)', pageWidth - 50, finalY + 5, { align: 'center' });
 
-  doc.save(`ke-hoach-mo-nhom-tong-hop.pdf`);
+  doc.save(`ke-hoach-mo-nhom.pdf`);
+};
+
+// bang phan cong cong tac giang vien
+export const printKeHoachMoNhomTongHop = (
+  data,
+  namHoc,
+  schoolName = 'TRƯỜNG ĐẠI HỌC XYZ',
+  departmentName = 'KHOA ABC'
+) => {
+  const doc = new jsPDF('landscape', 'mm', 'a4');
+  const pageWidth = doc.internal.pageSize.width;
+
+  // Header quốc hiệu, đơn vị
+  doc.setFont('times', 'bold').setFontSize(11);
+  doc.text(schoolName, 20, 20);
+  doc.setFont('times', 'normal');
+  doc.text(departmentName, 20, 25);
+  doc.setFont('times', 'bold');
+  doc.text('CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM', pageWidth - 20, 20, { align: 'right' });
+  doc.setFont('times', 'normal');
+  doc.text('Độc lập - Tự do - Hạnh phúc', pageWidth - 20, 25, { align: 'right' });
+  doc.line(20, 30, pageWidth - 20, 30);
+
+  doc.setFontSize(14).setFont('times', 'bold');
+  doc.text(
+    'BẢNG PHÂN CÔNG CÔNG TÁC CỦA CÁN BỘ, GIẢNG VIÊN CƠ HỮU NĂM HỌC ' + namHoc,
+    pageWidth / 2,
+    40,
+    {
+      align: 'center',
+    }
+  );
+
+  doc.setFontSize(11).setFont('times', 'normal');
+  const currentDate = format(new Date(), "dd 'tháng' MM 'năm' yyyy", { locale: vi });
+  doc.text(`Ngày in: ${currentDate}`, pageWidth / 2, 48, { align: 'center' });
+
+  const startY = 55;
+
+  // Header bảng
+  const tableHead = [
+    [
+      { content: 'STT', rowSpan: 3 },
+      { content: 'Mã CB', rowSpan: 3 },
+      { content: 'Họ và tên GV', rowSpan: 3 },
+      { content: 'Năm sinh', rowSpan: 3 },
+      { content: 'Chức danh,\nhọc vị', rowSpan: 3 },
+      { content: 'Phân công giảng dạy', colSpan: 9, styles: { halign: 'center' } },
+    ],
+    [
+      { content: 'Tên học phần', rowSpan: 2 },
+      { content: 'Mã học phần', rowSpan: 2 },
+      { content: 'Số TC', rowSpan: 2 },
+      { content: 'Số tiết của HP', rowSpan: 2 },
+      { content: 'Số lượng lớp, nhóm', rowSpan: 2 },
+      { content: 'Giảng dạy ở học kì', colSpan: 3, styles: { halign: 'center' } },
+      { content: 'Tổng số tiết giảng dạy của GV', rowSpan: 2 },
+    ],
+    ['1', '2', '3'],
+  ];
+
+  const tableBody = [];
+  let stt = 1;
+  data.forEach(gv => {
+    const phanCongCount = gv.phanCongGiangDay.length;
+    gv.phanCongGiangDay.forEach((pc, index) => {
+      const hocKyCols = ['', '', ''];
+      pc.hocKyDay.forEach(hk => {
+        if (hk >= 1 && hk <= 3) hocKyCols[hk - 1] = 'x';
+      });
+
+      // index === 0 ? { content: stt++, rowSpan: phanCongCount } : '',
+      //   index === 0 ? { content: gv.giangVien.maGiangVien, rowSpan: phanCongCount } : '',
+      //   index === 0 ? { content: gv.giangVien.hoVaTen, rowSpan: phanCongCount } : '',
+      //   index === 0 ? { content: gv.giangVien.namSinh, rowSpan: phanCongCount } : '',
+      //   index === 0 ? { content: gv.giangVien.chucDanh, rowSpan: phanCongCount } : '',
+
+      const temp =
+        index === 0
+          ? [
+              { content: stt++, rowSpan: phanCongCount },
+              { content: gv.giangVien.maGiangVien, rowSpan: phanCongCount },
+              { content: gv.giangVien.hoVaTen, rowSpan: phanCongCount },
+              { content: gv.giangVien.namSinh, rowSpan: phanCongCount },
+              { content: gv.giangVien.chucDanh, rowSpan: phanCongCount },
+            ]
+          : [];
+
+      const row = [
+        ...temp,
+        pc.tenHocPhan,
+        pc.maHocPhan,
+        pc.soTinChi,
+        pc.soTietHocPhan,
+        pc.soLuongNhomLop,
+        ...hocKyCols,
+        pc.tongSoTietDay,
+      ];
+      tableBody.push(row);
+    });
+
+    // Dòng tổng cộng của GV
+    tableBody.push([
+      { content: 'Tổng cộng', colSpan: 13, styles: { fontStyle: 'bold', halign: 'center' } },
+      gv.phanCongGiangDay.reduce((sum, pc) => sum + pc.tongSoTietDay, 0),
+    ]);
+  });
+
+  autoTable(doc, {
+    startY,
+    head: tableHead,
+    body: tableBody,
+    tableWidth: 'auto',
+    theme: 'grid',
+    styles: {
+      font: 'times',
+      fontSize: 10,
+      cellPadding: 2,
+      lineColor: [0, 0, 0],
+      lineWidth: 0.1,
+      textColor: [0, 0, 0],
+      overflow: 'linebreak',
+    },
+    columnStyles: {
+      0: { cellWidth: 8, halign: 'center' },
+      1: { cellWidth: 15, halign: 'center' },
+      2: { cellWidth: 40 },
+      3: { cellWidth: 15, halign: 'center' },
+      4: { cellWidth: 20 },
+      5: { cellWidth: 60 },
+      6: { cellWidth: 20 },
+      7: { cellWidth: 10, halign: 'center' },
+      8: { cellWidth: 15, halign: 'center' },
+      9: { cellWidth: 15, halign: 'center' },
+      10: { cellWidth: 10, halign: 'center' },
+      11: { cellWidth: 10, halign: 'center' },
+      12: { cellWidth: 10, halign: 'center' },
+      13: { cellWidth: 20, halign: 'center' },
+    },
+    headStyles: {
+      fillColor: [220, 220, 220],
+      fontStyle: 'bold',
+      halign: 'center',
+    },
+    didDrawPage: () => {
+      const pageHeight = doc.internal.pageSize.height;
+      doc.setFontSize(10).setFont('times', 'normal');
+      doc.text(`Trang ${doc.internal.getNumberOfPages()}`, pageWidth / 2, pageHeight - 10, {
+        align: 'center',
+      });
+    },
+  });
+
+  const pageHeight = doc.internal.pageSize.height;
+  let finalY = doc.lastAutoTable.finalY + 20;
+  const marginBottom = 30; // khoảng cách an toàn cuối trang
+
+  // Nếu không đủ chỗ -> thêm trang mới
+  if (finalY > pageHeight - marginBottom) {
+    doc.addPage();
+    finalY = 20; // vị trí đầu trang mới
+  }
+
+  // Footer chữ ký
+  doc.setFontSize(11).setFont('times', 'bold');
+  doc.text('TRƯỞNG KHOA', pageWidth - 50, finalY, { align: 'center' });
+  doc.setFont('times', 'normal');
+  doc.text('(Ký và ghi rõ họ tên)', pageWidth - 50, finalY + 5, { align: 'center' });
+
+  doc.save(`bang-phan-cong-giang-vien-${namHoc}.pdf`);
 };
 
 export default {
   printKeHoachDayHoc,
   printKeHoachMoNhomTheoHocKy,
+  printKeHoachMoNhom,
   printKeHoachMoNhomTongHop,
 };
