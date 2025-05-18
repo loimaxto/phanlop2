@@ -68,7 +68,7 @@ export default function AddNhomKienThucModal({ isOpen, onClose, refresh, nhomKie
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-[#00000094]">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-1/2">
+      <div className="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full">
         <h2 className="text-xl font-semibold mb-4">Thêm Nhóm Kiến Thức</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
