@@ -63,7 +63,7 @@ const updatePhanCong = async (id, data) => {
     return response.data;
   } catch (error) {
     console.error('Error updating Phan Cong:', error);
-    toast.error('Lỗi khi cập nhật phân công');
+    toast.error('Lỗi: ' + error.response?.data?.message || error.message);
     return null;
   }
 };
