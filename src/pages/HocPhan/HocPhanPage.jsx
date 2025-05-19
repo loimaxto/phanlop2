@@ -1,22 +1,62 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import CreateHocPhanModal from "./CreateHocPhanModal"
 import EditHocPhanModal from "./EditHocPhanModal"
+import HocPhanService from '@services/HocPhanService.js';
+
 export default function HocPhanPage() {
+
     const [isOpenCreate, setIsOpenCreate] = useState(false)
     const [isOpenEdit, setIsOpenEdit] = useState(false)
+    const [currentHocPhanObject, setCurrentHocPhanObject] = useState(null);
+    const [hocPhanList, setHocPhanList] = useState([]);
+    useEffect(() => {
+
+        fetchHocPhan();
+    }, [isOpenCreate, isOpenEdit,])
+    if (hocPhanList == null) return <>Lỗi lấy dữ liệu học phần</>
+
+    const fetchHocPhan = async () => {
+        try {
+            const data = await HocPhanService.getAll();
+            setHocPhanList(data);
+            console.log('Dữ liệu học phần đã được tải:', data);
+        } catch (error) {
+            console.error('Lỗi khi tải dữ liệu học phần:', error);
+        }
+    };
 
     const handleOpenCreate = () => {
         setIsOpenCreate(true)
     }
+
     const handleCloseCreate = () => {
         setIsOpenCreate(false)
     }
-    // const handleOpenEdit = () => {
-    //     setIsOpenEdit(true)
-    // }
+
     const handleCloseEdit = () => {
         setIsOpenEdit(false)
     }
+
+    const handleChooseEdit = (hocphanObject) => {
+        console.log(hocphanObject);
+        setCurrentHocPhanObject(hocphanObject);
+        setIsOpenEdit(true);
+    }
+
+    const handleDeleteHocPhan = async (hocPhanId) => {
+        const result = window.confirm('Bạn có chắc chắn xóa?');
+        if (result) {
+            try {
+                console.log(hocPhanId);
+                await HocPhanService.deleteHocPhan(hocPhanId); // Đợi xóa xong
+                await fetchHocPhan(); // Sau đó mới load lại dữ liệu
+            } catch (error) {
+                console.error('Lỗi khi xóa học phần:', error);
+            }
+        } else {
+            console.log('Người dùng đã chọn Cancel');
+        }
+    };
 
     return (
         <div className="container h-full">
@@ -34,56 +74,39 @@ export default function HocPhanPage() {
                             <th className="border" rowSpan="2">Mã HP</th>
                             <th className="border" rowSpan="2">Tên Học phần</th>
                             <th className="border" rowSpan="2">Số tín chỉ</th>
-                            <th className="border" colSpan="3">Số tiết dạy học</th>
-                            <th className="border" rowSpan="2">Hệ số học phần</th>
+                            <th className="border" colSpan="4">Số tiết dạy học</th>
                             <th className="border" rowSpan="2">Hành động</th>
                         </tr>
                         <tr>
                             <th className="border">Lý thuyết</th>
                             <th className="border">Thực hành</th>
-                            <th className="border">Cộng</th>
+                            <th className="border">Bài tập</th>
+                            <th className="border">Tổng</th>
                         </tr>
                     </thead>
                     <tbody id="ks-list">
-                        <tr className="text-center ">
-                            <td className="text-nowrap">123</td>
-                            <td>janesmith@example.com</td>
-                            <td>1</td>
-                            <td className="">1</td>
-                            <td className="">1</td>
-                            <td className="">1</td>
-                            <td className="">1</td>
-                            <td>
-                                <button className="btn btn-circle btn-text btn-sm" aria-label="Action button"><span
-                                    className="icon-[tabler--pencil] size-5"></span></button>
-                                <button className="btn btn-circle btn-text btn-sm" aria-label="Action button"><span
-                                    className="icon-[tabler--trash] size-5"></span></button>
-                                <button className="btn btn-circle btn-text btn-sm" aria-label="Action button"><span
-                                    className="icon-[tabler--dots-vertical] size-5"></span></button>
-                            </td>
-                        </tr>
-                        <tr className="text-center ">
-                            <td className="text-nowrap">123</td>
-                            <td>janesmith@example.com</td>
-                            <td>1</td>
-                            <td className="">1</td>
-                            <td className="">1</td>
-                            <td className="">1</td>
-                            <td className="">1</td>
-                            <td>
-                                <button className="btn btn-circle btn-text btn-sm" aria-label="Action button"><span
-                                    className="icon-[tabler--pencil] size-5"></span></button>
-                                <button className="btn btn-circle btn-text btn-sm" aria-label="Action button"><span
-                                    className="icon-[tabler--trash] size-5"></span></button>
-                                <button className="btn btn-circle btn-text btn-sm" aria-label="Action button"><span
-                                    className="icon-[tabler--dots-vertical] size-5"></span></button>
-                            </td>
-                        </tr>
+                        {hocPhanList.map((hocPhan, index) => (
+                            <tr key={index} className="text-center ">
+                                <td className="text-nowrap">{hocPhan.maHocPhan}</td>
+                                <td>{hocPhan.tenHocPhan}</td>
+                                <td>{hocPhan.soTinChi}</td>
+                                <td className="">{hocPhan.soTietLyThuyet}</td>
+                                <td className="">{hocPhan.soTietThucHanh}</td>
+                                <td className="">{hocPhan.soTietBaiTap}</td>
+                                <td className="">{hocPhan.soTietTongCong}</td>
+                                <td>
+                                    <button className="btn btn-circle btn-text btn-sm" aria-label="Action button" onClick={() => handleChooseEdit(hocPhan)}><span
+                                        className="icon-[tabler--pencil] size-5"></span></button>
+                                    <button className="btn btn-circle btn-text btn-sm" aria-label="Action button" onClick={() => handleDeleteHocPhan(hocPhan.id)}><span
+                                        className="icon-[tabler--trash] size-5"></span></button>
+                                </td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
             </div>
             <CreateHocPhanModal isOpen={isOpenCreate} onClose={handleCloseCreate} />
-            <EditHocPhanModal isOpen={isOpenEdit} onClose={handleCloseEdit} />
+            <EditHocPhanModal isOpen={isOpenEdit} onClose={handleCloseEdit} hocPhanObject={currentHocPhanObject} />
         </div>
 
     )
