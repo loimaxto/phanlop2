@@ -1,4 +1,43 @@
+import React, { useState } from 'react';
+
+import HocPhanService from '@services/HocPhanService.js';
+
 export default function CreateHocPhanModal({ isOpen, onClose }) {
+  const [tenHocPhan, setTenHocPhan] = useState(null);
+  const [soTinChi, setSoTinChi] = useState(0);
+  const [tietBaiTap, setTietBaiTap] = useState(0);
+  const [soTietLyThuyet, setSoTietLyThuyet] = useState(0);
+  const [soTietThucHanh, setSoTietThucHanh] = useState(0);
+
+  const [hocPhanTienQuyet, setHocPhanTienQuyet] = useState(null);
+  const [maHocPhan, setMaHocPhan] = useState(null);
+
+  const handleCreate = async () => {
+    const newHocPhan = {
+      "maHocPhan": maHocPhan,
+      "tenHocPhan": tenHocPhan,
+      "soTinChi": parseInt(soTinChi),
+      "soTietLyThuyet": parseInt(soTietLyThuyet),
+      "soTietBaiTap": parseInt(tietBaiTap),
+      "soTietThucHanh": parseInt(soTietThucHanh),
+      "maHocPhanTruoc": hocPhanTienQuyet,
+    };
+    console.log(newHocPhan)
+    try {
+      const response = await HocPhanService.createHocPhan(newHocPhan);
+
+      if (response == null) {
+        console.log('Lỗi khi tạo học phần');
+      } else {
+        console.log('Học phần đã được tạo:', response);
+        onClose();
+      }
+
+    } catch (error) {
+      console.error('Lỗi khi tạo học phần:', error);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -17,77 +56,114 @@ export default function CreateHocPhanModal({ isOpen, onClose }) {
           </div>
           <div className="modal-body items-center">
             <div className="w-full">
-              <label className="label-text" for="input-ten-hp">
+              <label className="label-text" htmlFor="input-ma-hp">
+                Mã học phần
+              </label>
+              <input
+                type="text"
+                placeholder="Nhập mã học phần"
+                className="input"
+                id="input-ma-hp"
+                value={maHocPhan}
+                onChange={(e) => setMaHocPhan(e.target.value)}
+              />
+            </div>
+            <div className="w-full">
+              <label className="label-text" htmlFor="input-ma-hp">
                 Tên học phần
               </label>
-              <input type="text" placeholder="John Doe" className="input" id="input-ten-hp" />
+              <input
+                type="text"
+                placeholder="Nhập tên học phần"
+                className="input"
+                id="input-ten-hp"
+                value={tenHocPhan}
+                onChange={(e) => setTenHocPhan(e.target.value)}
+              />
             </div>
             <div className="flex flex-row gap-4">
               <div className="max-w-32">
-                <label className="label-text" for="so-tinh-chi">
+                <label className="label-text" htmlFor="so-tinh-chi">
                   Số tính chỉ:
                 </label>
                 <div className="input items-center">
-                  <input className="text-center" type="number" min="0" id="so-tinh-chi" />
+                  <input
+                    className="text-center"
+                    type="number"
+                    min="0"
+                    id="so-tinh-chi"
+                    value={soTinChi}
+                    onChange={(e) => setSoTinChi(e.target.value)}
+                  />
                 </div>
               </div>
               <div className="max-w-32">
-                <label className="label-text" for="tiet-practical">
-                  Hệ số học phần:
+                <label className="label-text" htmlFor="tiet-bai-tap">
+                  Số tiết bài tập:
                 </label>
                 <div className="input items-center">
-                  <input className="text-center" type="number" min="0" id="tiet-practical" />
+                  <input
+                    className="text-center"
+                    type="number"
+                    min="0"
+                    id="tiet-bai-tap"
+                    value={tietBaiTap}
+                    onChange={(e) => setTietBaiTap(e.target.value)}
+                  />
                 </div>
               </div>
             </div>
             <div className="flex flex-row gap-4">
               <div className="max-w-32">
-                <label className="label-text" for="tiet-theory">
+                <label className="label-text" htmlFor="tiet-ly-thuyet">
                   Số tiết lý thuyết:
                 </label>
                 <div className="input items-center">
-                  <input className="text-center" type="number" min="0" id="tiet-theory" />
+                  <input
+                    className="text-center"
+                    type="number"
+                    min="0"
+                    id="tiet-ly-thuyet"
+                    value={soTietLyThuyet}
+                    onChange={(e) => setSoTietLyThuyet(e.target.value)}
+                  />
                 </div>
               </div>
               <div className="max-w-32">
-                <label className="label-text" for="tiet-practical">
+                <label className="label-text" htmlFor="tiet-thuc-hanh">
                   Số tiết thực hành:
                 </label>
                 <div className="input items-center">
-                  <input className="text-center" type="number" min="0" id="tiet-practical" />
+                  <input
+                    className="text-center"
+                    type="number"
+                    min="0"
+                    id="tiet-thuc-hanh"
+                    value={soTietThucHanh}
+                    onChange={(e) => setSoTietThucHanh(e.target.value)}
+                  />
                 </div>
               </div>
             </div>
             <div className="w-full">
-              <label className="label-text" for="select-nhom-kien-thuc">
-                {' '}
-                Nhóm kiến thức
-              </label>
-              <select className="select" id="select-nhom-kien-thuc">
-                <option>The Godfather</option>
-              </select>
-            </div>
-            <div className="w-full">
-              <label className="label-text" for="select-nhom-kien-thuc">
-                Loại học phần
-              </label>
-              <select className="select" id="select-nhom-kien-thuc">
-                <option value="1">Bắt buộc</option>
-                <option value="2">Tùy chọn</option>
-              </select>
-            </div>
-            <div className="w-full">
-              <label className="label-text" for="input-hp-tien-quyet">
+              <label className="label-text" htmlFor="input-hp-tien-quyet">
                 Học phần tiên quyết
               </label>
-              <input type="text" placeholder="fadsf" className="input" id="input-hp-tien-quyet" />
+              <input
+                type="text"
+                placeholder="Nhập học phần tiên quyết (nếu có)"
+                className="input"
+                id="input-hp-tien-quyet"
+                value={hocPhanTienQuyet}
+                onChange={(e) => setHocPhanTienQuyet(e.target.value)}
+              />
             </div>
           </div>
           <div className="modal-footer">
             <button onClick={onClose} type="button" className="btn btn-soft btn-secondary">
               Hủy
             </button>
-            <button type="button" className="btn btn-primary">
+            <button onClick={handleCreate} type="button" className="btn btn-primary">
               Xác nhận
             </button>
           </div>
