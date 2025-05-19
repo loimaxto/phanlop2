@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import ExcelJS from 'exceljs';
+import { getListAll } from '@/services/NganhService';
+import { getGiangVienExport } from '@/services/GiangVienService';
 
 const MauinGiangVienModal = ({ show, onClose }) => {
   const [nganhList, setNganhList] = useState([]);
@@ -11,9 +13,7 @@ const MauinGiangVienModal = ({ show, onClose }) => {
   useEffect(() => {
     const fetchNganhList = async () => {
       try {
-        const res = await fetch('http://localhost:8080/api/v1/nganh/get-list');
-        const data = await res.json().then(res => res.data);
-        // console.log({ data });
+        const data = await getListAll();
         setNganhList(data);
         if (data.length > 0) {
           setSelectedNganh(data[0].tenNganh);
@@ -29,117 +29,191 @@ const MauinGiangVienModal = ({ show, onClose }) => {
   }, [show]);
 
   const handleExport = async () => {
-    const res = await fetch(`http://localhost:8080/api/phanconggiangday/khoa/${selectedNganh}`);
-    const rawData = await res.json().then(res => res.data);
-    console.log(rawData);
-    const groupedData = rawData.reduce((acc, item) => {
-      if (!acc[item.GiangVienID]) acc[item.GiangVienID] = [];
-      acc[item.GiangVienID].push(item);
-      return acc;
-    }, {});
+    try {
+      const rawData = await getGiangVienExport(selectedNganh);
+      console.log(rawData);
+      const groupedData = rawData.reduce((acc, item) => {
+        if (!acc[item.giangVienID]) acc[item.giangVienID] = [];
+        acc[item.giangVienID].push(item);
+        return acc;
+      }, {});
 
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet('Phân công giảng dạy');
+      const workbook = new ExcelJS.Workbook();
+      const sheet = workbook.addWorksheet('Phân công giảng dạy');
 
-    // === Header
-    sheet.addRow([
-      'STT',
-      'Mã CB',
-      'Họ và tên GV',
-      'Năm sinh',
-      'Chức danh, học vị',
-      'Khoa',
-      'Tên học phần',
-      'Mã học phần',
-      'Số TC',
-      'Số tiết của HP',
-      'Giảng dạy ở học kì',
-      '',
-      '',
-      'Tổng số tiết giảng dạy của GV',
-    ]);
+      // === Header
+      const header1 = [
+        'STT',
+        'Mã CB',
+        'Họ và tên GV',
+        'Năm sinh',
+        'Chức danh, học vị',
+        'Khoa',
+        'Tên học phần',
+        'Mã học phần',
+        'Số TC',
+        'Số tiết của HP',
+        'Giảng dạy ở học kì',
+        '',
+        '',
+        'Tổng số tiết giảng dạy của GV',
+      ];
+      const header2 = ['', '', '', '', '', '', '', '', '', '', '1', '2', '3', ''];
 
-    sheet.addRow(['', '', '', '', '', '', '', '', '', '', '1', '2', '3', '']);
+      sheet.addRow(header1);
+      sheet.addRow(header2);
 
-    // Merge header cells
-    sheet.mergeCells('A1:A2');
-    sheet.mergeCells('B1:B2');
-    sheet.mergeCells('C1:C2');
-    sheet.mergeCells('D1:D2');
-    sheet.mergeCells('E1:E2');
-    sheet.mergeCells('F1:F2');
-    sheet.mergeCells('G1:G2');
-    sheet.mergeCells('H1:H2');
-    sheet.mergeCells('I1:I2');
-    sheet.mergeCells('J1:J2');
-    sheet.mergeCells('K1:M1'); // "Giảng dạy ở học kì"
-    sheet.mergeCells('N1:N2'); // Tổng số tiết giảng dạy của GV
+      sheet.mergeCells('A1:A2');
+      sheet.mergeCells('B1:B2');
+      sheet.mergeCells('C1:C2');
+      sheet.mergeCells('D1:D2');
+      sheet.mergeCells('E1:E2');
+      sheet.mergeCells('F1:F2');
+      sheet.mergeCells('G1:G2');
+      sheet.mergeCells('H1:H2');
+      sheet.mergeCells('I1:I2');
+      sheet.mergeCells('J1:J2');
+      sheet.mergeCells('K1:M1');
+      sheet.mergeCells('N1:N2');
 
-    let rowIndex = 3; // bắt đầu từ dòng thứ 3
-    let stt = 1;
+      const applyBorder = cell => {
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' },
+        };
+      };
 
-    for (const [gvId, hocPhanList] of Object.entries(groupedData)) {
-      const first = hocPhanList[0];
-
-      // Merge các thông tin cố định của giảng viên theo số dòng học phần
-      const numRows = hocPhanList.length;
-      const start = rowIndex;
-      const end = rowIndex + numRows - 1;
-
-      // Merge cột
-      sheet.mergeCells(`A${start}:A${end}`);
-      sheet.getCell(`A${start}`).value = stt++;
-      sheet.mergeCells(`B${start}:B${end}`);
-      sheet.getCell(`B${start}`).value = first.GiangVienID;
-      sheet.mergeCells(`C${start}:C${end}`);
-      sheet.getCell(`C${start}`).value = first.TenGV;
-      sheet.mergeCells(`D${start}:D${end}`);
-      sheet.getCell(`D${start}`).value = first.NamSinh;
-      sheet.mergeCells(`E${start}:E${end}`);
-      sheet.getCell(`E${start}`).value = first.ChucDanh;
-      sheet.mergeCells(`F${start}:F${end}`);
-      sheet.getCell(`F${start}`).value = first.khoa;
-
-      let totalTietGV = 0;
-
-      hocPhanList.forEach((hp, idx) => {
-        const currentRow = sheet.getRow(rowIndex);
-        currentRow.getCell(7).value = hp.TenHP;
-        currentRow.getCell(8).value = hp.MAHP;
-        currentRow.getCell(9).value = hp.SoTC;
-        currentRow.getCell(10).value = hp.SoTiet;
-        currentRow.getCell(11).value = hp.hk1;
-        currentRow.getCell(12).value = hp.hk2;
-        currentRow.getCell(13).value = hp.hk3;
-
-        const totalThisHP = (Number(hp.hk1) + Number(hp.hk2) + Number(hp.hk3)) * Number(hp.SoTiet);
-        totalTietGV += totalThisHP;
-
-        rowIndex++;
+      ['N1', 'N2'].forEach(cell => {
+        const c = sheet.getCell(cell);
+        applyBorder(c);
+        c.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+        c.font = { bold: true };
+        c.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFD9D9D9' },
+        };
       });
 
-      // Thêm dòng Tổng cộng
-      const totalRow = sheet.getRow(rowIndex);
-      totalRow.getCell(1).value = 'Tổng cộng';
-      sheet.mergeCells(`A${rowIndex}:M${rowIndex}`);
-      totalRow.getCell(14).value = totalTietGV;
+      const applyHeaderStyle = row => {
+        row.eachCell(cell => {
+          cell.font = { bold: true };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFD9D9D9' },
+          };
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          };
+        });
+      };
 
-      rowIndex++;
+      applyHeaderStyle(sheet.getRow(1));
+      applyHeaderStyle(sheet.getRow(2));
+
+      const applyCellStyle = (row, isBold = false, isGray = false) => {
+        row.eachCell(cell => {
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          cell.font = { bold: isBold };
+          if (isGray) {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFF2F2F2' },
+            };
+          }
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          };
+        });
+      };
+
+      let rowIndex = 3;
+      let stt = 1;
+
+      if (Object.keys(groupedData).length === 0) {
+        const row = sheet.getRow(rowIndex);
+        row.getCell(1).value = 'Không có dữ liệu phân công';
+        sheet.mergeCells(`A${rowIndex}:N${rowIndex}`);
+        row.font = { italic: true };
+        row.alignment = { horizontal: 'center' };
+        applyCellStyle(row);
+      } else {
+        for (const [gvId, hocPhanList] of Object.entries(groupedData)) {
+          const first = hocPhanList[0];
+          const numRows = hocPhanList.length;
+          const start = rowIndex;
+          const end = rowIndex + numRows - 1;
+
+          sheet.mergeCells(`A${start}:A${end}`);
+          sheet.getCell(`A${start}`).value = stt++;
+          sheet.mergeCells(`B${start}:B${end}`);
+          sheet.getCell(`B${start}`).value = first.giangVienID;
+          sheet.mergeCells(`C${start}:C${end}`);
+          sheet.getCell(`C${start}`).value = first.tenGV;
+          sheet.mergeCells(`D${start}:D${end}`);
+          sheet.getCell(`D${start}`).value = first.namSinh;
+          sheet.mergeCells(`E${start}:E${end}`);
+          sheet.getCell(`E${start}`).value = first.chucDanh;
+          sheet.mergeCells(`F${start}:F${end}`);
+          sheet.getCell(`F${start}`).value = first.khoa;
+
+          let totalTietGV = 0;
+
+          hocPhanList.forEach(hp => {
+            const row = sheet.getRow(rowIndex);
+            row.getCell(7).value = hp.tenHP;
+            row.getCell(8).value = hp.maHP;
+            row.getCell(9).value = hp.soTC;
+            row.getCell(10).value = hp.soTiet;
+            row.getCell(11).value = hp.hk1;
+            row.getCell(12).value = hp.hk2;
+            row.getCell(13).value = hp.hk3;
+
+            const totalThisHP =
+              (Number(hp.hk1) + Number(hp.hk2) + Number(hp.hk3)) * Number(hp.soTiet);
+            totalTietGV += totalThisHP;
+
+            applyCellStyle(row);
+            rowIndex++;
+          });
+
+          // Dòng tổng cộng
+          const totalRow = sheet.getRow(rowIndex);
+          totalRow.getCell(1).value = 'Tổng cộng';
+          sheet.mergeCells(`A${rowIndex}:M${rowIndex}`);
+          totalRow.getCell(14).value = totalTietGV;
+          applyCellStyle(totalRow, true, true);
+          rowIndex++;
+        }
+      }
+
+      // Auto width
+      sheet.columns.forEach(col => {
+        let maxLength = 10;
+        col.eachCell({ includeEmpty: true }, cell => {
+          const len = cell.value?.toString().length || 10;
+          if (len > maxLength) maxLength = len;
+        });
+        col.width = maxLength + 2;
+      });
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      saveAs(new Blob([buffer]), `PhanCongGiangDay_${selectedNganh}.xlsx`);
+    } catch (err) {
+      console.error('Lỗi export:', err);
+      alert('Xuất file thất bại!');
     }
-
-    // Auto width
-    sheet.columns.forEach(col => {
-      let maxLength = 10;
-      col.eachCell({ includeEmpty: true }, cell => {
-        const len = cell.value?.toString().length || 10;
-        if (len > maxLength) maxLength = len;
-      });
-      col.width = maxLength + 2;
-    });
-
-    // Xuất file
-    const buffer = await workbook.xlsx.writeBuffer();
-    saveAs(new Blob([buffer]), `PhanCongGiangDay_${selectedNganh}.xlsx`);
   };
 
   if (!show) return null;

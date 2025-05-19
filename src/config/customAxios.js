@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Tạo instance riêng
 const axiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_BACKEND_URL || 'http://localhost:8080:', // Thay đổi base URL theo project
+    baseURL: import.meta.env.VITE_API_BACKEND_URL || 'http://localhost:8080', // Thay đổi base URL theo project
     timeout: 10000,
     headers: {
         'Content-Type': 'application/json',

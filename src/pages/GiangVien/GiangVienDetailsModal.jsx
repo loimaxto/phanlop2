@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@mui/material';
-
+import { getPhanCongByGiangVienId } from '@/services/GiangVienService';
 const GiangVienDetailsModal = ({ giangVien, onClose }) => {
   const [phanCongList, setPhanCongList] = useState([]);
 
@@ -9,8 +9,7 @@ const GiangVienDetailsModal = ({ giangVien, onClose }) => {
       if (!giangVien?.id) return;
 
       try {
-        const response = await fetch(`http://localhost:8080/api/phanconggiangday/${giangVien.id}`);
-        const data = await response.json().then(res => res.data);
+        const data = await getPhanCongByGiangVienId(giangVien.id);
         setPhanCongList(data);
       } catch (err) {
         console.error('Lỗi khi gọi API phân công:', err);
@@ -22,12 +21,6 @@ const GiangVienDetailsModal = ({ giangVien, onClose }) => {
 
   if (!giangVien) return null;
 
-  const tongTietGiangDay = phanCongList.reduce(
-    (sum, item) =>
-      sum + (Number(item.hk1) + Number(item.hk2) + Number(item.hk3)) * Number(item.SoTiet),
-    0
-  );
-
   return (
     <div className="p-4 border-2 rounded-xl shadow-md bg-white mt-6 fixed inset-20 bg-opacity-50 overflow-auto">
       <div className="flex justify-between items-center mb-4">
@@ -35,7 +28,7 @@ const GiangVienDetailsModal = ({ giangVien, onClose }) => {
           X
         </Button>
         <div className="text-lg font-semibold">
-          Giảng viên: <strong>{giangVien.tenGV}</strong>
+          Giảng viên: <strong>{giangVien.ten}</strong>
         </div>
       </div>
 
@@ -83,10 +76,10 @@ const GiangVienDetailsModal = ({ giangVien, onClose }) => {
           <tbody className="text-center">
             {phanCongList.map((item, index) => (
               <tr key={index}>
-                <td className="border p-2">{item.TenHP}</td>
-                <td className="border p-2">{item.MAHP}</td>
-                <td className="border p-2">{item.SoTC}</td>
-                <td className="border p-2">{item.SoTiet}</td>
+                <td className="border p-2">{item.tenHP}</td>
+                <td className="border p-2">{item.maHP}</td>
+                <td className="border p-2">{item.soTinChi}</td>
+                <td className="border p-2">{item.soTiet}</td>
                 <td className="border p-2">
                   {Number(item.hk1) + Number(item.hk2) + Number(item.hk3)}
                 </td>
@@ -94,7 +87,7 @@ const GiangVienDetailsModal = ({ giangVien, onClose }) => {
                 <td className="border p-2">{item.hk2}</td>
                 <td className="border p-2">{item.hk3}</td>
                 <td className="border p-2">
-                  {(Number(item.hk1) + Number(item.hk2) + Number(item.hk3)) * Number(item.SoTiet)}
+                  {(Number(item.hk1) + Number(item.hk2) + Number(item.hk3)) * Number(item.soTiet)}
                 </td>
                 {index === 0 && (
                   <>
@@ -113,7 +106,7 @@ const GiangVienDetailsModal = ({ giangVien, onClose }) => {
                 {phanCongList.reduce(
                   (sum, item) =>
                     sum +
-                    (Number(item.hk1) + Number(item.hk2) + Number(item.hk3)) * Number(item.SoTiet),
+                    (Number(item.hk1) + Number(item.hk2) + Number(item.hk3)) * Number(item.soTiet),
                   0
                 )}
               </td>
@@ -128,7 +121,7 @@ const GiangVienDetailsModal = ({ giangVien, onClose }) => {
                 {phanCongList.reduce(
                   (sum, item) =>
                     sum +
-                    (Number(item.hk1) + Number(item.hk2) + Number(item.hk3)) * Number(item.SoTiet),
+                    (Number(item.hk1) + Number(item.hk2) + Number(item.hk3)) * Number(item.soTiet),
                   0
                 )}
               </td>

@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { getListAll } from '@/services/NganhService';
+import { createGiangVien } from '@/services/GiangVienService';
 
 const ThemGiangVienModal = ({ isOpen, onClose, onSave }) => {
   const [users, setUsers] = useState([]);
@@ -6,7 +8,7 @@ const ThemGiangVienModal = ({ isOpen, onClose, onSave }) => {
 
   const [newGiangVien, setNewGiangVien] = useState({
     userId: '',
-    tenGV: '',
+    ten: '',
     namSinh: '',
     chucDanh: '',
     khoa: '',
@@ -15,27 +17,22 @@ const ThemGiangVienModal = ({ isOpen, onClose, onSave }) => {
     trinhDo: '',
   });
 
-  // Fetch user & ngành khi modal mở
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const [userRes, nganhRes] = await Promise.all([
+        const [userRes, nganhListData] = await Promise.all([
           fetch('http://localhost:8080/api/v1/user'),
-          fetch('http://localhost:8080/api/v1/nganh/get-list'),
+          getListAll(),
         ]);
         const usersData = await userRes.json();
-        const nganhData = await nganhRes.json().then(res => res.data);
-
-        setUsers(usersData);
-        setNganhList(nganhData);
+        setUsers(Array.isArray(usersData) ? usersData : usersData.data || []);
+        setNganhList(nganhListData || []);
       } catch (err) {
         console.error('Lỗi khi fetch dữ liệu:', err);
       }
     };
 
-    if (isOpen) {
-      fetchOptions();
-    }
+    if (isOpen) fetchOptions();
   }, [isOpen]);
 
   const handleChange = e => {
@@ -44,54 +41,49 @@ const ThemGiangVienModal = ({ isOpen, onClose, onSave }) => {
   };
 
   const handleSave = async () => {
-    const { userId, tenGV, namSinh, chucDanh, khoa, boMon, chuyenMon, trinhDo } = newGiangVien;
+    const { userId, ten, namSinh, chucDanh, khoa, boMon, chuyenMon, trinhDo } = newGiangVien;
 
-    // Kiểm tra thiếu trường
-    if (!userId || !tenGV || !namSinh || !chucDanh || !khoa || !boMon || !chuyenMon || !trinhDo) {
+    if (!userId || !ten || !namSinh || !chucDanh || !khoa || !boMon || !chuyenMon || !trinhDo) {
       alert('Vui lòng nhập đầy đủ thông tin.');
       return;
     }
 
     try {
-      const res = await fetch('http://localhost:8080/api/v1/giang-vien/them', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newGiangVien),
+      const payload = {
+        ...newGiangVien,
+        namSinh: parseInt(namSinh, 10),
+        userId: parseInt(userId),
+      };
+
+      const data = await createGiangVien(payload);
+      alert('Thêm giảng viên thành công!');
+      onSave(data);
+      onClose();
+      setNewGiangVien({
+        userId: '',
+        ten: '',
+        namSinh: '',
+        chucDanh: '',
+        khoa: '',
+        boMon: '',
+        chuyenMon: '',
+        trinhDo: '',
       });
-
-      const data = await res.json().then(res => res.data);
-
-      if (res.ok) {
-        alert('Thêm giảng viên thành công!');
-        window.location.reload();
-        onSave(data); // gọi callback nếu có
-        onClose();
-        setNewGiangVien({
-          userId: '',
-          tenGV: '',
-          namSinh: '',
-          chucDanh: '',
-          khoa: '',
-          boMon: '',
-          chuyenMon: '',
-          trinhDo: '',
-        });
-      } else {
-        alert(data.message || 'Có lỗi xảy ra khi thêm giảng viên.');
-      }
+      window.location.reload();
     } catch (err) {
       console.error('Lỗi khi gọi API:', err);
-      alert('Không thể kết nối đến server.');
+      alert(err.response?.data?.message || 'Không thể kết nối đến server.');
     }
   };
 
   if (!isOpen) return null;
 
+  const usersActive = users.filter(user => user.status);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 relative">
         <h3 className="text-xl font-bold mb-4">Thêm Giảng Viên Mới</h3>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block font-medium mb-1">User</label>
@@ -101,12 +93,20 @@ const ThemGiangVienModal = ({ isOpen, onClose, onSave }) => {
               onChange={handleChange}
               className="w-full border rounded px-3 py-2"
             >
-              <option value="">Chọn user</option>
-              {users.map(user => (
-                <option key={user.userName} value={user.id}>
-                  {user.userName}
-                </option>
-              ))}
+              {usersActive.length > 0 ? (
+                <>
+                  <option value="" disabled>
+                    Chọn user
+                  </option>
+                  {usersActive.map(user => (
+                    <option key={user.id} value={user.id}>
+                      {user.username} - {user.email}
+                    </option>
+                  ))}
+                </>
+              ) : (
+                <option value="">Chưa có tài khoản nào khả dụng</option>
+              )}
             </select>
           </div>
 
@@ -114,8 +114,8 @@ const ThemGiangVienModal = ({ isOpen, onClose, onSave }) => {
             <label className="block font-medium mb-1">Tên Giảng Viên</label>
             <input
               type="text"
-              name="tenGV"
-              value={newGiangVien.tenGV}
+              name="ten"
+              value={newGiangVien.ten}
               onChange={handleChange}
               className="w-full border rounded px-3 py-2"
             />

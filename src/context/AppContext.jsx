@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import hocPhanService from '../services/HocPhanService';
-import giangVienService from '../services/giangVienService';
+import * as giangVienService from '../services/GiangVienService';
 import KeHoachDayHocService from '../services/KeHoachDayHocService';
 
 const AppContext = createContext();
