@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { getPhanCongByGiangVienId } from '@/services/GiangVienService';
 
 const GiangVienEditModal = ({ giangVien, onClose, onSuccess }) => {
+  const [phanCongList, setPhanCongList] = useState([]);
+
   const [formData, setFormData] = useState({
     ten: giangVien.ten,
     namSinh: giangVien.namSinh,
@@ -12,7 +14,7 @@ const GiangVienEditModal = ({ giangVien, onClose, onSuccess }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getPhanCongByGiangVienId(giangVienId);
+        const data = await getPhanCongByGiangVienId(giangVien.id);
         console.log('Phân công giảng dạy:', data);
         setPhanCongList(data);
       } catch (err) {
@@ -20,10 +22,10 @@ const GiangVienEditModal = ({ giangVien, onClose, onSuccess }) => {
       }
     };
 
-    if (isOpen) {
+    if (giangVien) {
       fetchData();
     }
-  }, [isOpen]);
+  }, [giangVien]);
 
   const handleChange = e => {
     const { name, value } = e.target;
@@ -35,7 +37,7 @@ const GiangVienEditModal = ({ giangVien, onClose, onSuccess }) => {
     if (!confirmUpdate) return;
 
     try {
-      const res = await fetch(`http://localhost:8080/api/giangvien/${giangVien.id}`, {
+      const res = await fetch(`http://localhost:8080/api/v1/giang-vien/${giangVien.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -60,6 +62,7 @@ const GiangVienEditModal = ({ giangVien, onClose, onSuccess }) => {
         <h2 className="text-xl font-bold mb-4 text-center">Chỉnh sửa giảng viên</h2>
 
         <div className="space-y-3">
+          <label className="text-sm font-semibold">Tên giảng viên</label>
           <input
             type="text"
             name="ten"
@@ -68,6 +71,7 @@ const GiangVienEditModal = ({ giangVien, onClose, onSuccess }) => {
             className="input input-bordered w-full"
             placeholder="Họ tên giảng viên"
           />
+          <label className="text-sm font-semibold">Năm sinh</label>
           <input
             type="number"
             name="namSinh"
@@ -76,6 +80,7 @@ const GiangVienEditModal = ({ giangVien, onClose, onSuccess }) => {
             className="input input-bordered w-full"
             placeholder="Năm sinh"
           />
+          <label className="text-sm font-semibold">Chức danh, học vị</label>
           <input
             type="text"
             name="chucDanh"
@@ -84,6 +89,7 @@ const GiangVienEditModal = ({ giangVien, onClose, onSuccess }) => {
             className="input input-bordered w-full"
             placeholder="Chức danh, học vị"
           />
+          <label className="text-sm font-semibold">Trình độ</label>
           <input
             type="text"
             name="trinhDo"
