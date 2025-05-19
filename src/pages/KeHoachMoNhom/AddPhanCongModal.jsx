@@ -69,7 +69,7 @@ const AddPhanCongModal = ({ isOpen, onClose, keHoachMoNhom, onSave }) => {
       toast.error('Số tiết thực hiện phải lớn hơn 0!');
       return;
     }
-    console.log('Form data before submission:', formData);
+    // console.log('Form data before submission:', formData);
     // Call the API to create the new assignment
     (async () => {
       const response = await KeHoachMoNhomService.createPhanCong(formData);
