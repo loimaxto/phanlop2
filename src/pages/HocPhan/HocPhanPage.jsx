@@ -10,45 +10,53 @@ export default function HocPhanPage() {
     const [currentHocPhanObject, setCurrentHocPhanObject] = useState(null);
     const [hocPhanList, setHocPhanList] = useState([]);
     useEffect(() => {
-        const fetchHocPhan = async () => {
-            try {
-                const data = await HocPhanService.getAll();
-                setHocPhanList(data);
-                console.log('Dữ liệu học phần đã được tải:', data);
-            } catch (error) {
-                console.error('Lỗi khi tải dữ liệu học phần:', error);
-            }
-        };
 
         fetchHocPhan();
-    }, [isOpenCreate,isOpenEdit,hocPhanList])
+    }, [isOpenCreate, isOpenEdit,])
     if (hocPhanList == null) return <>Lỗi lấy dữ liệu học phần</>
+
+    const fetchHocPhan = async () => {
+        try {
+            const data = await HocPhanService.getAll();
+            setHocPhanList(data);
+            console.log('Dữ liệu học phần đã được tải:', data);
+        } catch (error) {
+            console.error('Lỗi khi tải dữ liệu học phần:', error);
+        }
+    };
 
     const handleOpenCreate = () => {
         setIsOpenCreate(true)
     }
+
     const handleCloseCreate = () => {
         setIsOpenCreate(false)
     }
+
     const handleCloseEdit = () => {
         setIsOpenEdit(false)
     }
+
     const handleChooseEdit = (hocphanObject) => {
         console.log(hocphanObject);
         setCurrentHocPhanObject(hocphanObject);
         setIsOpenEdit(true);
     }
-    const handleDeleteHocPhan = (hocPhanId) => {
+
+    const handleDeleteHocPhan = async (hocPhanId) => {
         const result = window.confirm('Bạn có chắc chắn xóa?');
         if (result) {
-            console.log(hocPhanId);
-            HocPhanService.deleteHocPhan(hocPhanId)
-            setHocPhanList([])
+            try {
+                console.log(hocPhanId);
+                await HocPhanService.deleteHocPhan(hocPhanId); // Đợi xóa xong
+                await fetchHocPhan(); // Sau đó mới load lại dữ liệu
+            } catch (error) {
+                console.error('Lỗi khi xóa học phần:', error);
+            }
         } else {
-        console.log('Người dùng đã chọn Cancel');
+            console.log('Người dùng đã chọn Cancel');
         }
-        
-    }
+    };
 
     return (
         <div className="container h-full">
@@ -87,9 +95,9 @@ export default function HocPhanPage() {
                                 <td className="">{hocPhan.soTietBaiTap}</td>
                                 <td className="">{hocPhan.soTietTongCong}</td>
                                 <td>
-                                    <button className="btn btn-circle btn-text btn-sm" aria-label="Action button" onClick={()=>handleChooseEdit(hocPhan)}><span
+                                    <button className="btn btn-circle btn-text btn-sm" aria-label="Action button" onClick={() => handleChooseEdit(hocPhan)}><span
                                         className="icon-[tabler--pencil] size-5"></span></button>
-                                    <button className="btn btn-circle btn-text btn-sm" aria-label="Action button" onClick={()=>handleDeleteHocPhan(hocPhan.id)}><span
+                                    <button className="btn btn-circle btn-text btn-sm" aria-label="Action button" onClick={() => handleDeleteHocPhan(hocPhan.id)}><span
                                         className="icon-[tabler--trash] size-5"></span></button>
                                 </td>
                             </tr>
@@ -97,8 +105,8 @@ export default function HocPhanPage() {
                     </tbody>
                 </table>
             </div>
-            <CreateHocPhanModal isOpen={isOpenCreate} onClose={handleCloseCreate}  />
-            <EditHocPhanModal isOpen={isOpenEdit} onClose={handleCloseEdit} hocPhanObject={currentHocPhanObject}/>
+            <CreateHocPhanModal isOpen={isOpenCreate} onClose={handleCloseCreate} />
+            <EditHocPhanModal isOpen={isOpenEdit} onClose={handleCloseEdit} hocPhanObject={currentHocPhanObject} />
         </div>
 
     )

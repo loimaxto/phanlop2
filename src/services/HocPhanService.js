@@ -20,6 +20,15 @@ const getById = async id => {
     return null;
   }
 };
+const getHocPhanWithDeCuongChitiet = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/v1/hoc-phan/hocphan-exist-decuongchitiet`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching Hoc Phan data:', error);
+    return null;
+  }
+};
 const createHocPhan = async hocPhanData => 
 {
   try {
@@ -40,7 +49,7 @@ const updateHocPhan = async (hocPhanData,hocPhanId) =>
     return response.data;
   } catch (error) {
     console.log("test",error['response'])
-    console.error('Error create Hoc Phan data: không đọc được error from be', error);
+    console.error('Error edit Hoc Phan data: không đọc được error from be', error);
     
     return null;
   }
@@ -52,7 +61,7 @@ const deleteHocPhan = async (hocPhanId) =>
     return response.data;
   } catch (error) {
     console.log("test",error['response'])
-    console.error('Error create Hoc Phan data: không đọc được error from be', error);
+    console.error('Error delete Hoc Phan data', error);
     
     return null;
   }
@@ -60,6 +69,7 @@ const deleteHocPhan = async (hocPhanId) =>
 export default {
   getAll,
   getById,
+  getHocPhanWithDeCuongChitiet,
   createHocPhan,
   updateHocPhan,
   deleteHocPhan,

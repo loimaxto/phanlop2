@@ -34,7 +34,7 @@ export default function EditHocPhanModal({ isOpen, onClose, hocPhanObject }) {
       "soTietLyThuyet": parseInt(soTietLyThuyet),
       "soTietBaiTap": parseInt(tietBaiTap),
       "soTietThucHanh": parseInt(soTietThucHanh),
-      "maHocPhanTruoc": hocPhanTienQuyet,
+      "maHocPhanTruoc": hocPhanTienQuyet == ''? null : hocPhanTienQuyet,
     };
     console.log(newHocPhan)
     try {
