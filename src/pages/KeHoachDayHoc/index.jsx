@@ -636,7 +636,7 @@ const KeHoachDayHocPage = () => {
                               groupedDataByKhoi[khoi.id].nhom[nhom.id].tuChon || [];
                             if (
                               nhomItemsBatBuoc.length === 0 &&
-                              nhomItemsBatBuoc.length === 0 &&
+                              nhomItemsTuChon.length === 0 &&
                               selectedGroup !== 'all'
                             )
                               return null;
@@ -752,7 +752,7 @@ const KeHoachDayHocPage = () => {
                                   nhomItemsTuChon.length === 0 && (
                                     <tr>
                                       <td
-                                        colSpan="17"
+                                        colSpan="18"
                                         className="p-3 border text-center text-gray-500 text-sm"
                                       >
                                         Không có học phần nào trong nhóm này
@@ -767,26 +767,13 @@ const KeHoachDayHocPage = () => {
                         {expandedKhoi[khoi.id] && nhomInKhoi.length === 0 && (
                           <tr>
                             <td
-                              colSpan="17"
+                              colSpan="18"
                               className="p-3 border text-center text-gray-500 text-sm"
                             >
                               Không có học phần nào trong khối này
                             </td>
                           </tr>
                         )}
-
-                        {/* Dòng tổng kết cho khối kiến thức */}
-                        {/* {khoiItems.length > 0 && (
-                          <tr className={`bg-gray-200 border-t-2 border-gray-400`}>
-                            <td colSpan="3" className="p-2 border text-right font-medium">
-                              Tổng số tín chỉ khối {khoi.name}:
-                            </td>
-                            <td className="p-2 border text-center font-medium">
-                              {khoiCredits[khoi.id]}
-                            </td>
-                            <td colSpan="13" className="p-2 border"></td>
-                          </tr>
-                        )} */}
                       </>
                     )}
                   </React.Fragment>
@@ -795,7 +782,7 @@ const KeHoachDayHocPage = () => {
 
               {filteredData.length === 0 && (
                 <tr>
-                  <td colSpan="17" className="p-3 border text-center text-gray-500">
+                  <td colSpan="18" className="p-3 border text-center text-gray-500">
                     Không tìm thấy học phần nào
                   </td>
                 </tr>
@@ -809,7 +796,7 @@ const KeHoachDayHocPage = () => {
                 <td className="p-3 border text-center">
                   {filteredData.reduce((sum, item) => sum + item.soTinChi, 0)}
                 </td>
-                <td colSpan="13" className="p-3 border"></td>
+                <td colSpan="14" className="p-3 border"></td>
               </tr>
             </tfoot>
           </table>

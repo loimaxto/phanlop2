@@ -18,7 +18,7 @@ export default function ThemKeHoachMoNhom() {
 
   const handleChange = e => {
     const { name, value } = e.target;
-    console.log('Field changed:', name, value); // Debugging line
+    // console.log('Field changed:', name, value);
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -31,7 +31,7 @@ export default function ThemKeHoachMoNhom() {
 
     (async () => {
       try {
-        console.log('Form data before submission:', formData);
+        // console.log('Form data before submission:', formData);
         const response = await KeHoachMoNhomService.createKeHoachMoNhom(formData);
         if (!response) {
           return;

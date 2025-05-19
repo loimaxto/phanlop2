@@ -12,7 +12,7 @@ import {
   getGiangVienList,
   searchGiangVien,
   getGiangVienByKhoa,
-  deleteGiangVien
+  deleteGiangVien,
 } from '@/services/giangVienService';
 
 const GiangVienPage = () => {
@@ -40,53 +40,52 @@ const GiangVienPage = () => {
     fetchNganh();
   }, []);
 
-useEffect(() => {
-  const timeout = setTimeout(async () => {
-    try {
-      let data = [];
-      if (searchText.trim()) {
-        data = await searchGiangVien(searchText.trim());
-      } else if (selectedKhoa !== '1') {
-        data = await getGiangVienByKhoa(selectedKhoa);
-      } else {
-        data = await getGiangVienList();
+  useEffect(() => {
+    const timeout = setTimeout(async () => {
+      try {
+        let data = [];
+        if (searchText.trim()) {
+          data = await searchGiangVien(searchText.trim());
+        } else if (selectedKhoa !== '1') {
+          data = await getGiangVienByKhoa(selectedKhoa);
+        } else {
+          data = await getGiangVienList();
+        }
+
+        const dataWithTiet = await Promise.all(
+          data.map(async gv => {
+            try {
+              const res = await fetch(`http://localhost:8080/api/phanconggiangday/${gv.id}`);
+              if (!res.ok) throw new Error(`Lỗi khi gọi API: ${res.status}`);
+              const tietData = await res.json();
+
+              console.log(` GV ${gv.ten} có dữ liệu:`, tietData);
+
+              const tongTiet = tietData.reduce((sum, item) => {
+                const hk1 = Number(item.hk1 || 0);
+                const hk2 = Number(item.hk2 || 0);
+                const hk3 = Number(item.hk3 || 0);
+                const soTiet = Number(item.soTiet || 0);
+                const heSo = hk1 + hk2 + hk3;
+                return sum + heSo * soTiet;
+              }, 0);
+
+              return { ...gv, tongTiet };
+            } catch (err) {
+              console.error(`❌ Lỗi khi xử lý tiết của GV ${gv.ten}:`, err);
+              return { ...gv, tongTiet: 0 };
+            }
+          })
+        );
+
+        setGiangVienList(dataWithTiet);
+      } catch (error) {
+        console.error('❌ Lỗi khi lấy danh sách giảng viên:', error);
       }
+    }, 500);
 
-      const dataWithTiet = await Promise.all(
-        data.map(async (gv) => {
-          try {
-            const res = await fetch(`http://localhost:8080/api/phanconggiangday/${gv.id}`);
-            if (!res.ok) throw new Error(`Lỗi khi gọi API: ${res.status}`);
-            const tietData = await res.json();
-
-            console.log(` GV ${gv.ten} có dữ liệu:`, tietData);
-
-            const tongTiet = tietData.reduce((sum, item) => {
-              const hk1 = Number(item.hk1 || 0);
-              const hk2 = Number(item.hk2 || 0);
-              const hk3 = Number(item.hk3 || 0);
-              const soTiet = Number(item.soTiet || 0);
-              const heSo = hk1 + hk2 + hk3;
-              return sum + heSo * soTiet;
-            }, 0);
-
-            return { ...gv, tongTiet };
-          } catch (err) {
-            console.error(`❌ Lỗi khi xử lý tiết của GV ${gv.ten}:`, err);
-            return { ...gv, tongTiet: 0 };
-          }
-        })
-      );
-
-      setGiangVienList(dataWithTiet);
-    } catch (error) {
-      console.error("❌ Lỗi khi lấy danh sách giảng viên:", error);
-    }
-  }, 500);
-
-  return () => clearTimeout(timeout);
-}, [searchText, selectedKhoa]);
-
+    return () => clearTimeout(timeout);
+  }, [searchText, selectedKhoa]);
 
   const handleView = (e, gv) => {
     e.stopPropagation();
@@ -100,10 +99,8 @@ useEffect(() => {
     setIsEditModalOpen(true);
   };
 
-  const handleSaveEdit = (updatedGV) => {
-    setGiangVienList((prev) =>
-      prev.map((gv) => (gv.id === updatedGV.id ? updatedGV : gv))
-    );
+  const handleSaveEdit = updatedGV => {
+    setGiangVienList(prev => prev.map(gv => (gv.id === updatedGV.id ? updatedGV : gv)));
   };
 
   const handleDelete = async (e, gv) => {
@@ -112,7 +109,7 @@ useEffect(() => {
 
     try {
       await deleteGiangVien(gv.id);
-      setGiangVienList((prev) => prev.filter((item) => item.id !== gv.id));
+      setGiangVienList(prev => prev.filter(item => item.id !== gv.id));
       alert('Đã xoá giảng viên');
     } catch (error) {
       console.error(error);
@@ -120,8 +117,8 @@ useEffect(() => {
     }
   };
 
-  const handleAddGiangVien = (newGV) => {
-    setGiangVienList((prev) => [...prev, newGV]);
+  const handleAddGiangVien = newGV => {
+    setGiangVienList(prev => [...prev, newGV]);
     setIsAddModalOpen(false);
   };
 
@@ -145,7 +142,7 @@ useEffect(() => {
               placeholder="Tìm giảng viên"
               className="input input-bordered w-full pr-10"
               value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
+              onChange={e => setSearchText(e.target.value)}
             />
             <FaSearch className="absolute right-3 top-3 text-gray-500" />
           </div>
@@ -153,10 +150,10 @@ useEffect(() => {
           <select
             className="select select-bordered w-full"
             value={selectedKhoa}
-            onChange={(e) => setSelectedKhoa(e.target.value)}
+            onChange={e => setSelectedKhoa(e.target.value)}
           >
             <option value="1">Tất cả</option>
-            {nganhList.map((nganh) => (
+            {nganhList.map(nganh => (
               <option key={nganh.tenNganh} value={nganh.tenNganh}>
                 {nganh.tenNganh}
               </option>
@@ -200,21 +197,21 @@ useEffect(() => {
                         <button
                           title="Xem chi tiết"
                           className="text-blue-600 hover:text-blue-800"
-                          onClick={(e) => handleView(e, gv)}
+                          onClick={e => handleView(e, gv)}
                         >
                           <FaEye />
                         </button>
                         <button
                           title="Chỉnh sửa"
                           className="text-green-600 hover:text-green-800"
-                          onClick={(e) => handleEdit(e, gv)}
+                          onClick={e => handleEdit(e, gv)}
                         >
                           <MdEdit />
                         </button>
                         <button
                           title="Xoá"
                           className="text-red-600 hover:text-red-800"
-                          onClick={(e) => handleDelete(e, gv)}
+                          onClick={e => handleDelete(e, gv)}
                         >
                           <FaTrashAlt />
                         </button>
@@ -259,10 +256,7 @@ useEffect(() => {
         onSave={handleAddGiangVien}
       />
 
-      <MauinGiangVienModal
-        show={isExportModalOpen}
-        onClose={() => setIsExportModalOpen(false)}
-      />
+      <MauinGiangVienModal show={isExportModalOpen} onClose={() => setIsExportModalOpen(false)} />
     </div>
   );
 };
