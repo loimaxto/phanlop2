@@ -7,15 +7,14 @@ const app = express();
 const port = 5000;
 app.use(express.json());
 
-
 app.use(cors());
 
 // Kết nối MySQL
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: '',        
-  database: 'ctdt',    
+  password: '',
+  database: 'ctdt',
 });
 
 db.connect(err => {
@@ -27,7 +26,7 @@ db.connect(err => {
 });
 
 // Route lấy danh sách giảng viên
-app.get('/api/giangvien', (req, res) => {
+app.get('/api/v1/giang-vien', (req, res) => {
   db.query('SELECT * FROM giangvien WHERE status = 1', (err, results) => {
     if (err) {
       return res.status(500).json({ error: 'Lỗi truy vấn DB' });
@@ -38,9 +37,9 @@ app.get('/api/giangvien', (req, res) => {
 
 // Lấy toàn bộ phân công giảng dạy theo ID giảng viên
 app.get('/api/phanconggiangday/:idGV', (req, res) => {
-    const giangVienId = req.params.idGV;
-  
-    const query = `
+  const giangVienId = req.params.idGV;
+
+  const query = `
 SELECT 
   hp.id AS MAHP,
   hp.tenHP AS TenHP,
@@ -61,18 +60,18 @@ GROUP BY
   hp.id, hp.tenHP, hp.soTinChi
 
     `;
-  
-    db.query(query, [giangVienId], (err, results) => {
-      if (err) {
-        console.error('Lỗi truy vấn phân công giảng dạy:', err);
-        return res.status(500).json({ error: 'Lỗi truy vấn phân công giảng dạy' });
-      }
-      res.json(results);
-    });
-  });
 
-   //update giang viên
-  app.put('/api/giangvien/:id', (req, res) => {
+  db.query(query, [giangVienId], (err, results) => {
+    if (err) {
+      console.error('Lỗi truy vấn phân công giảng dạy:', err);
+      return res.status(500).json({ error: 'Lỗi truy vấn phân công giảng dạy' });
+    }
+    res.json(results);
+  });
+});
+
+//update giang viên
+app.put('/api/v1/giang-vien/:id', (req, res) => {
   const id = req.params.id;
   const { tenGV, namSinh, chucDanh, trinhDo } = req.body;
 
@@ -97,7 +96,7 @@ GROUP BY
 });
 
 // Xoá mềm giảng viên (set status = 0)
-app.put('/api/giangvien/delete/:id', (req, res) => {
+app.put('/api/v1/giang-vien/delete/:id', (req, res) => {
   const id = req.params.id;
   const sql = `
     UPDATE giangvien 
@@ -120,7 +119,7 @@ app.put('/api/giangvien/delete/:id', (req, res) => {
 });
 
 // Lấy danh sách giảng viên theo khoa (lọc theo ngành)
-app.get('/api/giangvien/by-khoa/:khoa', (req, res) => {
+app.get('/api/v1/giang-vien/by-khoa/:khoa', (req, res) => {
   const khoa = req.params.khoa;
 
   const sql = `SELECT * FROM giangvien WHERE status = 1 AND khoa = ?`;
@@ -135,7 +134,7 @@ app.get('/api/giangvien/by-khoa/:khoa', (req, res) => {
 
 // Lấy danh sách giảng viên theo tên (tìm kiếm theo tên)
 
-app.get('/api/giangvien/search/:tenGV', (req, res) => {
+app.get('/api/v1/giang-vien/search/:tenGV', (req, res) => {
   const tenGV = req.params.tenGV;
   const sql = `SELECT * FROM giangvien WHERE status = 1 AND tenGV LIKE ?`;
   db.query(sql, [`%${tenGV}%`], (err, results) => {
@@ -174,7 +173,7 @@ app.get('/api/user', (req, res) => {
     res.json(results); // Trả về danh sách người dùng
   });
 });
-app.post('/api/giangvien/them', (req, res) => {
+app.post('/api/v1/giang-vien/them', (req, res) => {
   const { userId, tenGV, namSinh, chucDanh, khoa, boMon, chuyenMon, trinhDo } = req.body;
 
   if (!userId || !tenGV || !namSinh || !chucDanh || !khoa || !boMon || !chuyenMon || !trinhDo) {
@@ -191,19 +190,15 @@ app.post('/api/giangvien/them', (req, res) => {
   db.query(sql, values, (err, result) => {
     if (err) {
       console.error('Lỗi khi thêm giảng viên:', err);
-      return res.status(500).json({ message: 'Lỗi server khi thêm giảng viên.', error: err.message });
+      return res
+        .status(500)
+        .json({ message: 'Lỗi server khi thêm giảng viên.', error: err.message });
     }
 
     res.status(201).json({ message: 'Thêm giảng viên thành công.', giangVienId: result.insertId });
   });
 });
 
-
-
-
-  app.listen(port, () => {
-    console.log(`API server chạy tại http://localhost:${port}`);
-  });
-  
-  
-  
+app.listen(port, () => {
+  console.log(`API server chạy tại http://localhost:${port}`);
+});

@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 import KeHoachDayHocService from '../../services/KeHoachDayHocService';
 
 export default function AddNhomKienThucModal({ isOpen, onClose, refresh, nhomKienThuc }) {
-  console.log('nhomKienThuc', nhomKienThuc);
+  // console.log('nhomKienThuc', nhomKienThuc);
   if (!isOpen) return null;
 
   // {

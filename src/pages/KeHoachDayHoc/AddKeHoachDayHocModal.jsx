@@ -13,7 +13,6 @@ const AddKeHoachDayHocModal = ({
   listNhomKienThuc,
   listKhoiKienThuc,
 }) => {
-  console.log('listNhomKienThuc', listNhomKienThuc);
   // return null;
   if (!isOpen) return null;
 

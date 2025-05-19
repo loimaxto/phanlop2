@@ -8,32 +8,32 @@ const GiangVienEditModal = ({ giangVien, onClose, onSuccess }) => {
     trinhDo: giangVien.trinhDo,
   });
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async () => {
-    const confirmUpdate = window.confirm("Bạn có chắc muốn cập nhật thông tin này?");
+    const confirmUpdate = window.confirm('Bạn có chắc muốn cập nhật thông tin này?');
     if (!confirmUpdate) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/giangvien/${giangVien.id}`, {
+      const res = await fetch(`http://localhost:8080/api/v1/giang-vien/${giangVien.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
-      const data = await res.json();
+      const data = await res.json().then(res => res.data);
       if (res.ok) {
-        alert("Cập nhật thành công!");
-        window.location.reload(); 
-        onClose();     // đóng modal
+        alert('Cập nhật thành công!');
+        window.location.reload();
+        onClose(); // đóng modal
       } else {
-        alert("Lỗi: " + data.message);
+        alert('Lỗi: ' + data.message);
       }
     } catch (err) {
-      alert("Lỗi khi cập nhật: " + err.message);
+      alert('Lỗi khi cập nhật: ' + err.message);
     }
   };
 
@@ -41,7 +41,7 @@ const GiangVienEditModal = ({ giangVien, onClose, onSuccess }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-6 bg-opacity-50 rounded-lg w-full max-w-md">
         <h2 className="text-xl font-bold mb-4 text-center">Chỉnh sửa giảng viên</h2>
-        
+
         <div className="space-y-3">
           <input
             type="text"
@@ -78,8 +78,12 @@ const GiangVienEditModal = ({ giangVien, onClose, onSuccess }) => {
         </div>
 
         <div className="mt-6 flex justify-end gap-3">
-          <button className="btn btn-outline" onClick={onClose}>Huỷ</button>
-          <button className="btn btn-primary" onClick={handleSubmit}>Lưu</button>
+          <button className="btn btn-outline" onClick={onClose}>
+            Huỷ
+          </button>
+          <button className="btn btn-primary" onClick={handleSubmit}>
+            Lưu
+          </button>
         </div>
       </div>
     </div>

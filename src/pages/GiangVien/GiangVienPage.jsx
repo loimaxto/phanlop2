@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react'; 
-import { MdAdd, MdEdit, MdImportExport } from 'react-icons/md'; 
+import React, { useState, useEffect } from 'react';
+import { MdAdd, MdEdit, MdImportExport } from 'react-icons/md';
 import { FaSearch, FaEye, FaTrashAlt } from 'react-icons/fa';
 import GiangVienDetailsModal from './GiangVienDetailsModal';
 import GiangVienEditModal from './GiangVienEditModal';
 import ThemGiangVienModal from './ThemGiangVienModal';
 import MauinGiangVienModal from './MauinGiangVienModal';
-
 
 const GiangVienPage = () => {
   const [giangVienList, setGiangVienList] = useState([]);
@@ -16,14 +15,14 @@ const GiangVienPage = () => {
   const [searchText, setSearchText] = useState('');
   const [nganhList, setNganhList] = useState([]); // Lưu danh sách ngành
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchNganhData = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/nganh'); // API để lấy ngành
-        const data = await res.json();
+        const res = await fetch('http://localhost:8080/api/v1/nganh/get-list'); // API để lấy ngành
+        const data = await res.json().then(res => res.data);
+
         setNganhList(data); // Cập nhật danh sách ngành vào state
       } catch (error) {
         console.error('Lỗi khi lấy danh sách ngành:', error);
@@ -33,58 +32,53 @@ const [isExportModalOpen, setIsExportModalOpen] = useState(false);
     fetchNganhData();
   }, []);
 
-
-  
-
   // Fetch data from API when component mounts
-useEffect(() => {
-  const fetchGiangVien = async () => {
-    try {
-      // Gọi API theo tên nếu có search
-      const apiUrl = searchText.trim()
-        ? `http://localhost:5000/api/giangvien/search/${encodeURIComponent(searchText)}`
-        : 'http://localhost:5000/api/giangvien';
+  useEffect(() => {
+    const fetchGiangVien = async () => {
+      try {
+        // Gọi API theo tên nếu có search
+        const apiUrl = searchText.trim()
+          ? `http://localhost:8080/api/v1/giang-vien/search/${encodeURIComponent(searchText)}`
+          : 'http://localhost:8080/api/v1/giang-vien';
 
-      const res = await fetch(apiUrl);
-      const giangVienData = await res.json();
+        const res = await fetch(apiUrl);
+        const giangVienData = await res.json();
 
-      const withTietPromises = giangVienData.map(async (gv) => {
-        try {
-          const tietRes = await fetch(`http://localhost:5000/api/phanconggiangday/${gv.id}`);
-          const tietData = await tietRes.json();
+        const withTietPromises = giangVienData.map(async gv => {
+          try {
+            const tietRes = await fetch(`http://localhost:8080/api/phanconggiangday/${gv.id}`);
+            const tietData = await tietRes.json();
 
-          const tongTiet = tietData.reduce((sum, item) => {
-            const heSo = Number(item.hk1) + Number(item.hk2) + Number(item.hk3);
-            return sum + heSo * Number(item.SoTiet || 0);
-          }, 0);
+            const tongTiet = tietData.reduce((sum, item) => {
+              const heSo = Number(item.hk1) + Number(item.hk2) + Number(item.hk3);
+              return sum + heSo * Number(item.SoTiet || 0);
+            }, 0);
 
-          return {
-            ...gv,
-            tongTiet,
-          };
-        } catch (err) {
-          console.error(`Lỗi khi lấy tiết cho GV ${gv.id}:`, err);
-          return {
-            ...gv,
-            tongTiet: 0,
-          };
-        }
-      });
+            return {
+              ...gv,
+              tongTiet,
+            };
+          } catch (err) {
+            console.error(`Lỗi khi lấy tiết cho GV ${gv.id}:`, err);
+            return {
+              ...gv,
+              tongTiet: 0,
+            };
+          }
+        });
 
-      const giangVienWithTiet = await Promise.all(withTietPromises);
-      setGiangVienList(giangVienWithTiet);
-    } catch (error) {
-      console.error('Lỗi khi gọi API:', error);
-    }
-  };
+        const giangVienWithTiet = await Promise.all(withTietPromises);
+        setGiangVienList(giangVienWithTiet);
+      } catch (error) {
+        console.error('Lỗi khi gọi API:', error);
+      }
+    };
 
-  // Debounce 500ms khi tìm kiếm
-  const timeout = setTimeout(fetchGiangVien, 500);
+    // Debounce 500ms khi tìm kiếm
+    const timeout = setTimeout(fetchGiangVien, 500);
 
-  return () => clearTimeout(timeout);
-}, [searchText]);
-
-  
+    return () => clearTimeout(timeout);
+  }, [searchText]);
 
   const handleView = (e, giangVien) => {
     e.stopPropagation();
@@ -92,43 +86,40 @@ useEffect(() => {
     setIsModalOpen(true);
   };
 
-const handleEdit = (e, giangVien) => {
-  e.stopPropagation();
-  setSelectedGiangVien(giangVien);
-  setIsEditModalOpen(true);
-};
+  const handleEdit = (e, giangVien) => {
+    e.stopPropagation();
+    setSelectedGiangVien(giangVien);
+    setIsEditModalOpen(true);
+  };
 
-const handleSaveEdit = (updatedGV) => {
-  // Gọi API PUT/POST tại đây nếu cần, hiện chỉ cập nhật local
-  setGiangVienList(prev =>
-    prev.map(gv => gv.id === updatedGV.id ? updatedGV : gv)
-  );
-};
+  const handleSaveEdit = updatedGV => {
+    // Gọi API PUT/POST tại đây nếu cần, hiện chỉ cập nhật local
+    setGiangVienList(prev => prev.map(gv => (gv.id === updatedGV.id ? updatedGV : gv)));
+  };
 
-const handleDelete = async (e, giangVien) => {
-  e.stopPropagation();
-  const confirmDelete = window.confirm(`Bạn có chắc muốn xoá ${giangVien.tenGV}?`);
-  if (!confirmDelete) return;
+  const handleDelete = async (e, giangVien) => {
+    e.stopPropagation();
+    const confirmDelete = window.confirm(`Bạn có chắc muốn xoá ${giangVien.tenGV}?`);
+    if (!confirmDelete) return;
 
-  try {
-    const res = await fetch(`http://localhost:5000/api/giangvien/delete/${giangVien.id}`, {
-      method: 'PUT',
-    });
+    try {
+      const res = await fetch(`http://localhost:8080/api/v1/giang-vien/delete/${giangVien.id}`, {
+        method: 'PUT',
+      });
 
-    if (!res.ok) {
-      throw new Error('Lỗi khi xoá giảng viên');
+      if (!res.ok) {
+        throw new Error('Lỗi khi xoá giảng viên');
+      }
+
+      // Xoá khỏi UI sau khi xoá thành công trên server
+      setGiangVienList(prev => prev.filter(gv => gv.id !== giangVien.id));
+
+      alert('Đã xoá giảng viên');
+    } catch (err) {
+      console.error(err);
+      alert('Lỗi khi xoá giảng viên');
     }
-
-    // Xoá khỏi UI sau khi xoá thành công trên server
-    setGiangVienList(prev => prev.filter(gv => gv.id !== giangVien.id));
-
-    alert('Đã xoá giảng viên');
-  } catch (err) {
-    console.error(err);
-    alert('Lỗi khi xoá giảng viên');
-  }
-};
-
+  };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -143,10 +134,9 @@ const handleDelete = async (e, giangVien) => {
           <button className="btn btn-primary gap-2" onClick={() => setIsAddModalOpen(true)}>
             <MdAdd /> Thêm
           </button>
-        <button className="btn btn-accent gap-2" onClick={() => setIsExportModalOpen(true)}>
-          <MdImportExport /> Export mẫu in
-        </button>
-
+          <button className="btn btn-accent gap-2" onClick={() => setIsExportModalOpen(true)}>
+            <MdImportExport /> Export mẫu in
+          </button>
         </div>
 
         <div className="flex flex-col md:flex-row gap-3 w-full lg:w-1/2">
@@ -155,31 +145,33 @@ const handleDelete = async (e, giangVien) => {
               type="text"
               placeholder="Tìm giảng viên"
               className="input input-bordered w-full pr-10"
-              onChange={(e) => setSearchText(e.target.value)}
+              onChange={e => setSearchText(e.target.value)}
             />
             <FaSearch className="absolute right-3 top-3 text-gray-500" />
           </div>
-   <select
+          <select
             className="select select-bordered w-full"
             value={selectedKhoa}
-            onChange={async (e) => {
+            onChange={async e => {
               const khoa = e.target.value;
               setSelectedKhoa(khoa);
 
               try {
-                let url = 'http://localhost:5000/api/giangvien';
+                let url = 'http://localhost:8080/api/v1/giang-vien';
 
                 if (khoa !== '1') {
-                  url = `http://localhost:5000/api/giangvien/by-khoa/${khoa}`;
+                  url = `http://localhost:8080/api/v1/giang-vien/by-khoa/${khoa}`;
                 }
 
                 const res = await fetch(url);
-                const data = await res.json();
+                const data = await res.json().then(res => res.data);
 
-                const withTietPromises = data.map(async (gv) => {
+                const withTietPromises = data.map(async gv => {
                   try {
-                    const tietRes = await fetch(`http://localhost:5000/api/phanconggiangday/${gv.id}`);
-                    const tietData = await tietRes.json();
+                    const tietRes = await fetch(
+                      `http://localhost:8080/api/phanconggiangday/${gv.id}`
+                    );
+                    const tietData = await tietRes.json().then(res => res.data);
 
                     const tongTiet = tietData.reduce((sum, item) => {
                       const heSo = Number(item.hk1) + Number(item.hk2) + Number(item.hk3);
@@ -206,15 +198,16 @@ const handleDelete = async (e, giangVien) => {
               }
             }}
           >
-            <option disabled value="">Chọn ngành</option>
+            <option disabled value="">
+              Chọn ngành
+            </option>
             <option value="1">Tất cả</option>
-            {nganhList.map((nganh) => (
+            {nganhList.map(nganh => (
               <option key={nganh.tenNganh} value={nganh.tenNganh}>
                 {nganh.tenNganh}
               </option>
             ))}
           </select>
-
         </div>
       </div>
 
@@ -253,21 +246,21 @@ const handleDelete = async (e, giangVien) => {
                         <button
                           title="Xem chi tiết"
                           className="text-blue-600 hover:text-blue-800"
-                          onClick={(e) => handleView(e, giangVien)}
+                          onClick={e => handleView(e, giangVien)}
                         >
                           <FaEye />
                         </button>
                         <button
                           title="Chỉnh sửa"
                           className="text-green-600 hover:text-green-800"
-                          onClick={(e) => handleEdit(e, giangVien)}
+                          onClick={e => handleEdit(e, giangVien)}
                         >
                           <MdEdit />
                         </button>
                         <button
                           title="Xoá"
                           className="text-red-600 hover:text-red-800"
-                          onClick={(e) => handleDelete(e, giangVien)}
+                          onClick={e => handleDelete(e, giangVien)}
                         >
                           <FaTrashAlt />
                         </button>
@@ -289,14 +282,11 @@ const handleDelete = async (e, giangVien) => {
 
       {/* Modal */}
       {isModalOpen && (
-        <GiangVienDetailsModal 
-          giangVien={selectedGiangVien} 
-          onClose={handleCloseModal} 
-        /> 
-      )} 
+        <GiangVienDetailsModal giangVien={selectedGiangVien} onClose={handleCloseModal} />
+      )}
 
-            {isEditModalOpen && (
-        <GiangVienEditModal 
+      {isEditModalOpen && (
+        <GiangVienEditModal
           giangVien={selectedGiangVien}
           onClose={() => setIsEditModalOpen(false)}
           onSave={handleSaveEdit}
@@ -304,21 +294,17 @@ const handleDelete = async (e, giangVien) => {
       )}
 
       <ThemGiangVienModal
-  isOpen={isAddModalOpen}
-  onClose={() => setIsAddModalOpen(false)}
-  onSave={(newGV) => {
-    // TODO: Gọi API để lưu giảng viên mới
-    console.log('Giảng viên mới:', newGV);
-  }}
-/>
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSave={newGV => {
+          // TODO: Gọi API để lưu giảng viên mới
+          console.log('Giảng viên mới:', newGV);
+        }}
+      />
 
-<MauinGiangVienModal
-  show={isExportModalOpen}
-  onClose={() => setIsExportModalOpen(false)}
-/>
-
-    </div> 
-  ); 
-}; 
+      <MauinGiangVienModal show={isExportModalOpen} onClose={() => setIsExportModalOpen(false)} />
+    </div>
+  );
+};
 
 export default GiangVienPage;

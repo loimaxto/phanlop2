@@ -12,7 +12,7 @@ const ThemGiangVienModal = ({ isOpen, onClose, onSave }) => {
     khoa: '',
     boMon: '',
     chuyenMon: '',
-    trinhDo: ''
+    trinhDo: '',
   });
 
   // Fetch user & ngành khi modal mở
@@ -20,11 +20,11 @@ const ThemGiangVienModal = ({ isOpen, onClose, onSave }) => {
     const fetchOptions = async () => {
       try {
         const [userRes, nganhRes] = await Promise.all([
-          fetch('http://localhost:5000/api/user'),
-          fetch('http://localhost:5000/api/nganh')
+          fetch('http://localhost:8080/api/v1/user'),
+          fetch('http://localhost:8080/api/v1/nganh/get-list'),
         ]);
         const usersData = await userRes.json();
-        const nganhData = await nganhRes.json();
+        const nganhData = await nganhRes.json().then(res => res.data);
 
         setUsers(usersData);
         setNganhList(nganhData);
@@ -38,62 +38,52 @@ const ThemGiangVienModal = ({ isOpen, onClose, onSave }) => {
     }
   }, [isOpen]);
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
     setNewGiangVien(prev => ({ ...prev, [name]: value }));
   };
 
-const handleSave = async () => {
-  const {
-    userId,
-    tenGV,
-    namSinh,
-    chucDanh,
-    khoa,
-    boMon,
-    chuyenMon,
-    trinhDo
-  } = newGiangVien;
+  const handleSave = async () => {
+    const { userId, tenGV, namSinh, chucDanh, khoa, boMon, chuyenMon, trinhDo } = newGiangVien;
 
-  // Kiểm tra thiếu trường
-  if (!userId || !tenGV || !namSinh || !chucDanh || !khoa || !boMon || !chuyenMon || !trinhDo) {
-    alert('Vui lòng nhập đầy đủ thông tin.');
-    return;
-  }
-
-  try {
-    const res = await fetch('http://localhost:5000/api/giangvien/them', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newGiangVien)
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      alert('Thêm giảng viên thành công!');
-      window.location.reload(); 
-      onSave(data); // gọi callback nếu có
-      onClose();
-      setNewGiangVien({
-        userId: '',
-        tenGV: '',
-        namSinh: '',
-        chucDanh: '',
-        khoa: '',
-        boMon: '',
-        chuyenMon: '',
-        trinhDo: ''
-      });
-    } else {
-      alert(data.message || 'Có lỗi xảy ra khi thêm giảng viên.');
+    // Kiểm tra thiếu trường
+    if (!userId || !tenGV || !namSinh || !chucDanh || !khoa || !boMon || !chuyenMon || !trinhDo) {
+      alert('Vui lòng nhập đầy đủ thông tin.');
+      return;
     }
-  } catch (err) {
-    console.error('Lỗi khi gọi API:', err);
-    alert('Không thể kết nối đến server.');
-  }
-};
 
+    try {
+      const res = await fetch('http://localhost:8080/api/v1/giang-vien/them', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newGiangVien),
+      });
+
+      const data = await res.json().then(res => res.data);
+
+      if (res.ok) {
+        alert('Thêm giảng viên thành công!');
+        window.location.reload();
+        onSave(data); // gọi callback nếu có
+        onClose();
+        setNewGiangVien({
+          userId: '',
+          tenGV: '',
+          namSinh: '',
+          chucDanh: '',
+          khoa: '',
+          boMon: '',
+          chuyenMon: '',
+          trinhDo: '',
+        });
+      } else {
+        alert(data.message || 'Có lỗi xảy ra khi thêm giảng viên.');
+      }
+    } catch (err) {
+      console.error('Lỗi khi gọi API:', err);
+      alert('Không thể kết nối đến server.');
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -205,10 +195,7 @@ const handleSave = async () => {
         </div>
 
         <div className="mt-6 flex justify-end gap-3">
-          <button
-            className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
-            onClick={onClose}
-          >
+          <button className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400" onClick={onClose}>
             Huỷ
           </button>
           <button
