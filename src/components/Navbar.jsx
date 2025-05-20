@@ -1,5 +1,11 @@
 import React from 'react';
 import { NavLink } from 'react-router';
+import { MdAssignment, MdCastForEducation } from 'react-icons/md';
+import { GiTeacher } from 'react-icons/gi';
+import { ImBooks } from 'react-icons/im';
+import { BsClipboardDataFill } from 'react-icons/bs';
+import { FaUser } from 'react-icons/fa';
+
 export default function NavBar() {
   return (
     <aside
@@ -12,13 +18,13 @@ export default function NavBar() {
         <ul className="menu">
           <li>
             <NavLink to="/ctdt" className={({ isActive }) => (isActive ? 'bg-blue-200' : '')}>
-              <span className="icon-[tabler--home] size-5"></span>
+              <MdCastForEducation />
               Chương trình đào tạo
             </NavLink>
           </li>
           <li>
             <NavLink to="/hoc-phan" className={({ isActive }) => (isActive ? 'bg-blue-200' : '')}>
-              <span className="icon-[tabler--home] size-5"></span>
+              <ImBooks />
               Học phần
             </NavLink>
           </li>
@@ -27,7 +33,7 @@ export default function NavBar() {
               to="/de-cuong-chi-tiet"
               className={({ isActive }) => (isActive ? 'bg-blue-200' : '')}
             >
-              <span className="icon-[tabler--home] size-5"></span>
+              <BsClipboardDataFill />
               Đề cương chi tiết
             </NavLink>
           </li>
@@ -36,33 +42,21 @@ export default function NavBar() {
               to="/ke-hoach-mo-nhom"
               className={({ isActive }) => (isActive ? 'bg-blue-200' : '')}
             >
-              <span className="icon-[tabler--home] size-5"></span>
+              <MdAssignment />
               Kế hoạch mở nhóm
             </NavLink>
           </li>
           <li>
             <NavLink to="/giang-vien" className={({ isActive }) => (isActive ? 'bg-blue-200' : '')}>
-              <span className="icon-[tabler--home] size-5"></span>
+              <GiTeacher />
               Giảng viên
             </NavLink>
           </li>
           <li>
-            <a href="#">
-              <span className="icon-[tabler--user] size-5"></span>
-              User
-            </a>
-          </li>
-          <li>
-            <a href="#">
-              <span className="icon-[tabler--login] size-5"></span>
-              Sign In
-            </a>
-          </li>
-          <li>
-            <a href="#">
-              <span className="icon-[tabler--logout-2] size-5"></span>
-              Sign Out
-            </a>
+            <NavLink to="/users" className={({ isActive }) => (isActive ? 'bg-blue-200' : '')}>
+              <FaUser />
+              Người dùng
+            </NavLink>
           </li>
         </ul>
       </div>

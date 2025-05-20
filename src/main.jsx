@@ -13,6 +13,7 @@ import KeHoachMoNhomPage from './pages/KeHoachMoNhom';
 import CreateKeHoachMoNhom from './pages/KeHoachMoNhom/CreateKeHoachMoNhom';
 import { AppProvider } from './context/AppContext';
 import GiangVienPage from './pages/GiangVien/GiangVienPage';
+import UserPage from './pages/UserPage';
 
 const root = document.getElementById('root');
 
@@ -31,6 +32,7 @@ ReactDOM.createRoot(root).render(
           <Route path="/ke-hoach-mo-nhom" element={<KeHoachMoNhomPage />} />
           <Route path="/ke-hoach-mo-nhom/create" element={<CreateKeHoachMoNhom />} />
           <Route path="/giang-vien" element={<GiangVienPage />} />
+          <Route path="/users" element={<UserPage />} />
         </Route>
       </Routes>
     </AppProvider>
