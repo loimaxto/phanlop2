@@ -125,9 +125,10 @@ const KeHoachDayHocPage = () => {
     };
     const nhomInKhoi = nhomKienThucData.filter(nhom => nhom.khoiKienThucId === khoi.id);
     nhomInKhoi.forEach(nhom => {
-      groupedDataByKhoi[khoi.id].nhom[nhom.id] = filteredData.filter(
-        item => item.nhomKienThucId === nhom.id
-      );
+      groupedDataByKhoi[khoi.id].nhom[nhom.id] = {
+        batBuoc: filteredData.filter(item => item.nhomKienThucId === nhom.id && item.batBuoc),
+        tuChon: filteredData.filter(item => item.nhomKienThucId === nhom.id && !item.batBuoc),
+      };
     });
   });
 
@@ -237,12 +238,13 @@ const KeHoachDayHocPage = () => {
   };
 
   // Handle edit nhom kien thuc
-  const handleEditNhomKienThuc = nhom => {
+  const handleEditNhomKienThuc = (nhom, itemsTuChon) => {
     setModal({
       isOpen: true,
       mode: 'editNhomKienThuc',
       item: {
         ...nhom,
+        tongSoTinChiTuChon: itemsTuChon.reduce((sum, item) => sum + item.soTinChi, 0),
       },
     });
   };
@@ -288,6 +290,79 @@ const KeHoachDayHocPage = () => {
   const handlePrint = () => {
     printService.printKeHoachDayHoc(nganh.name, keHoachData, nhomKienThucData, khoiKienThucData);
     setIsPrintMenuOpen(false);
+  };
+
+  const showItems = (isExpanded, type, nhom, khoi) => {
+    const items = groupedDataByKhoi[khoi.id].nhom[nhom.id][type];
+    let tongSoTinChi = items.reduce((sum, item) => sum + item.soTinChi, 0);
+    if (type === 'tuChon') tongSoTinChi = `${nhom.soTinChiTuChonToiThieu}/${tongSoTinChi}`;
+    return (
+      <>
+        {isExpanded && items.length > 0 && (
+          <>
+            <tr className="bg-gray-50 text-sm">
+              <td colSpan="3" className="ps-12 border text-start font-medium">
+                Học phần {type === 'batBuoc' ? 'bắt buộc' : 'tự chọn'}
+              </td>
+              <td className="p-3 border text-center font-medium">{tongSoTinChi}</td>
+              <td colSpan="14" className="border"></td>
+            </tr>
+            {items.map((keHoachDayHoc, index) => (
+              <tr key={keHoachDayHoc.id} className="hover:bg-gray-50 text-sm">
+                <td className="p-3 border">{index + 1}</td>
+                <td className="p-3 border">{keHoachDayHoc.maHP}</td>
+                <td className="p-3 border">{keHoachDayHoc.tenHocPhan}</td>
+                <td className="p-3 border text-center">{keHoachDayHoc.soTinChi}</td>
+                {[...Array(12)].map((_, i) => (
+                  <td key={i} className="p-2 border text-center">
+                    {keHoachDayHoc.hocKi.includes(i + 1) ? (
+                      <span className="inline-block w-4 h-4 bg-blue-500 rounded-sm text-white text-xs flex items-center justify-center">
+                        x
+                      </span>
+                    ) : null}
+                  </td>
+                ))}
+                <td className="p-3 border">{keHoachDayHoc.maHocPhanTruoc}</td>
+                <td className="p-3 border">
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleEditKeHoachDayHoc(keHoachDayHoc, nhom.id, khoi.id)}
+                      className="text-blue-500 hover:text-blue-700"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteKeHoachDayHoc(keHoachDayHoc.id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </>
+        )}
+      </>
+    );
   };
 
   return (
@@ -553,12 +628,21 @@ const KeHoachDayHocPage = () => {
                     {expandedKhoi[khoi.id] && (
                       <>
                         {
-                          // Multiple nhom in khoi, display grouped by nhom
+                          // Multiple nhom in khoi, display grouped by nhom, tu chon/bat buoc
                           nhomInKhoi.map((nhom, nhomIndex) => {
-                            const nhomItems = groupedDataByKhoi[khoi.id].nhom[nhom.id] || [];
-                            if (nhomItems.length === 0 && selectedGroup !== 'all') return null;
+                            const nhomItemsBatBuoc =
+                              groupedDataByKhoi[khoi.id].nhom[nhom.id].batBuoc || [];
+                            const nhomItemsTuChon =
+                              groupedDataByKhoi[khoi.id].nhom[nhom.id].tuChon || [];
+                            if (
+                              nhomItemsBatBuoc.length === 0 &&
+                              nhomItemsTuChon.length === 0 &&
+                              selectedGroup !== 'all'
+                            )
+                              return null;
 
                             return (
+                              // in 1 dong tong hop, va cac ke hoach trong nhom
                               <React.Fragment key={`khoi-${khoi.id}-nhom-${nhom.id}`}>
                                 <tr className={`${getGroupColor(nhomIndex)} border text-sm`}>
                                   <td
@@ -567,10 +651,7 @@ const KeHoachDayHocPage = () => {
                                     onClick={() => toggleNhom(nhom.id)}
                                   >
                                     <div className="ps-3 flex justify-between items-center">
-                                      <div>
-                                        {`${nhomIndex + 1}. ${nhom.tenNhom}`} ({nhomItems.length}{' '}
-                                        học phần - {nhomCredits[nhom.id]} tín chỉ)
-                                      </div>
+                                      <div>{`${nhomIndex + 1}. ${nhom.tenNhom}`}</div>
                                       <div>
                                         {expandedNhom[nhom.id] ? (
                                           <svg
@@ -610,7 +691,9 @@ const KeHoachDayHocPage = () => {
                                       <button
                                         className="p-1 rounded-l-md bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 transition-colors"
                                         title="Sửa nhóm kiến thức"
-                                        onClick={() => handleEditNhomKienThuc(nhom)}
+                                        onClick={() =>
+                                          handleEditNhomKienThuc(nhom, nhomItemsTuChon)
+                                        }
                                       >
                                         <svg
                                           xmlns="http://www.w3.org/2000/svg"
@@ -661,80 +744,21 @@ const KeHoachDayHocPage = () => {
                                   </td>
                                 </tr>
 
+                                {/* hien thi nhom tuchon/bat buoc neu length > 0*/}
+                                {showItems(expandedNhom[nhom.id], 'batBuoc', nhom, khoi)}
+                                {showItems(expandedNhom[nhom.id], 'tuChon', nhom, khoi)}
                                 {expandedNhom[nhom.id] &&
-                                  nhomItems.map((keHoachDayHoc, index) => (
-                                    <tr key={keHoachDayHoc.id} className="hover:bg-gray-50 text-sm">
-                                      <td className="p-3 border">{index + 1}</td>
-                                      <td className="p-3 border">{keHoachDayHoc.maHP}</td>
-                                      <td className="p-3 border">{keHoachDayHoc.tenHocPhan}</td>
-                                      <td className="p-3 border text-center">
-                                        {keHoachDayHoc.soTinChi}
-                                      </td>
-                                      {[...Array(12)].map((_, i) => (
-                                        <td key={i} className="p-2 border text-center">
-                                          {keHoachDayHoc.hocKi.includes(i + 1) ? (
-                                            <span className="inline-block w-4 h-4 bg-blue-500 rounded-sm text-white text-xs flex items-center justify-center">
-                                              x
-                                            </span>
-                                          ) : null}
-                                        </td>
-                                      ))}
-                                      <td className="p-3 border">{keHoachDayHoc.maHocPhanTruoc}</td>
-                                      <td className="p-3 border">
-                                        <div className="flex space-x-2">
-                                          <button
-                                            onClick={() =>
-                                              handleEditKeHoachDayHoc(
-                                                keHoachDayHoc,
-                                                nhom.id,
-                                                khoi.id
-                                              )
-                                            }
-                                            className="text-blue-500 hover:text-blue-700"
-                                          >
-                                            <svg
-                                              xmlns="http://www.w3.org/2000/svg"
-                                              className="h-5 w-5"
-                                              viewBox="0 0 20 20"
-                                              fill="currentColor"
-                                            >
-                                              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                            </svg>
-                                          </button>
-                                          <button
-                                            onClick={() =>
-                                              handleDeleteKeHoachDayHoc(keHoachDayHoc.id)
-                                            }
-                                            className="text-red-500 hover:text-red-700"
-                                          >
-                                            <svg
-                                              xmlns="http://www.w3.org/2000/svg"
-                                              className="h-5 w-5"
-                                              viewBox="0 0 20 20"
-                                              fill="currentColor"
-                                            >
-                                              <path
-                                                fillRule="evenodd"
-                                                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                                                clipRule="evenodd"
-                                              />
-                                            </svg>
-                                          </button>
-                                        </div>
+                                  nhomItemsBatBuoc.length === 0 &&
+                                  nhomItemsTuChon.length === 0 && (
+                                    <tr>
+                                      <td
+                                        colSpan="18"
+                                        className="p-3 border text-center text-gray-500 text-sm"
+                                      >
+                                        Không có học phần nào trong nhóm này
                                       </td>
                                     </tr>
-                                  ))}
-
-                                {expandedNhom[nhom.id] && nhomItems.length === 0 && (
-                                  <tr>
-                                    <td
-                                      colSpan="17"
-                                      className="p-3 border text-center text-gray-500 text-sm"
-                                    >
-                                      Không có học phần nào trong nhóm này
-                                    </td>
-                                  </tr>
-                                )}
+                                  )}
                               </React.Fragment>
                             );
                           })
@@ -743,26 +767,13 @@ const KeHoachDayHocPage = () => {
                         {expandedKhoi[khoi.id] && nhomInKhoi.length === 0 && (
                           <tr>
                             <td
-                              colSpan="17"
+                              colSpan="18"
                               className="p-3 border text-center text-gray-500 text-sm"
                             >
                               Không có học phần nào trong khối này
                             </td>
                           </tr>
                         )}
-
-                        {/* Dòng tổng kết cho khối kiến thức */}
-                        {/* {khoiItems.length > 0 && (
-                          <tr className={`bg-gray-200 border-t-2 border-gray-400`}>
-                            <td colSpan="3" className="p-2 border text-right font-medium">
-                              Tổng số tín chỉ khối {khoi.name}:
-                            </td>
-                            <td className="p-2 border text-center font-medium">
-                              {khoiCredits[khoi.id]}
-                            </td>
-                            <td colSpan="13" className="p-2 border"></td>
-                          </tr>
-                        )} */}
                       </>
                     )}
                   </React.Fragment>
@@ -771,7 +782,7 @@ const KeHoachDayHocPage = () => {
 
               {filteredData.length === 0 && (
                 <tr>
-                  <td colSpan="17" className="p-3 border text-center text-gray-500">
+                  <td colSpan="18" className="p-3 border text-center text-gray-500">
                     Không tìm thấy học phần nào
                   </td>
                 </tr>
@@ -785,7 +796,7 @@ const KeHoachDayHocPage = () => {
                 <td className="p-3 border text-center">
                   {filteredData.reduce((sum, item) => sum + item.soTinChi, 0)}
                 </td>
-                <td colSpan="13" className="p-3 border"></td>
+                <td colSpan="14" className="p-3 border"></td>
               </tr>
             </tfoot>
           </table>

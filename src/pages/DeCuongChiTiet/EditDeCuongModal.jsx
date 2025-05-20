@@ -1,25 +1,43 @@
-import React, { useState, useEffect } from 'react'; // Import useState
-import DeCuongChiTietService from '@services/DeCuongChiTietService.js'
-export default function CreateDeCuongModal({ isOpen, onClose }) {
-    const [contentItems, setContentItems] = useState([
-        { id: Date.now(), ten: '', trongSo: '', hinhThuc: '' }
-    ]);
-    const [maHocPhan, setMaHocPhan] = useState('');
+import React, { useState, useEffect } from 'react';
+import DeCuongChiTietService from '@services/DeCuongChiTietService.js';
+
+const initialContentItem = { id: Date.now(), ten: '', trongSo: '', hinhThuc: '' };
+
+export default function EditDeCuongModal({ isOpen, onClose, hocPhanObject }) {
+    const [contentItems, setContentItems] = useState([initialContentItem]);
+
+    const loadDeCuongData = async () => {
+        try {
+            if (hocPhanObject == null) {console.log("hoc phan object rong"); return } 
+            const response = await DeCuongChiTietService.getDeCuongByHocPhanId(hocPhanObject.id);
+            console.log("aaa", response);
+            const data = response || [];
+            if (data.length > 0) {
+                setContentItems(data.map(item => ({
+                    id: item.id,
+                    ten: item.tenCotDiem,
+                    trongSo: item.trongSo,
+                    hinhThuc: item.hinhThuc,
+                })));
+
+            }
+        } catch (error) {
+            console.error('Lỗi khi tải dữ liệu đề cương:', error);
+        }
+    }
+
     useEffect(() => {
-        setContentItems([
-            { id: Date.now(), ten: '', trongSo: '', hinhThuc: '' }
-        ])
-        setMaHocPhan('')
-    }, [isOpen])
-    const handleMaHocPhanChange = (event) => {
-        setMaHocPhan(event.target.value);
-    };
+        if (isOpen && hocPhanObject) {
+            loadDeCuongData();
+        } else if (isOpen) {
+            setContentItems([initialContentItem]);
+        }
+    }, [hocPhanObject, isOpen]);
+
+
 
     const handleAddItem = () => {
-        setContentItems(prevItems => [
-            ...prevItems,
-            { id: Date.now(), ten: '', trongSo: '', hinhThuc: '' }
-        ]);
+        setContentItems(prevItems => [...prevItems, initialContentItem]);
     };
 
     const handleRemoveItem = (idToRemove) => {
@@ -29,20 +47,13 @@ export default function CreateDeCuongModal({ isOpen, onClose }) {
     const handleInputChange = (itemId, event) => {
         const { name, value } = event.target;
         setContentItems(prevItems =>
-            prevItems.map(item =>
-                item.id === itemId ? { ...item, [name]: value } : item
-            )
+            prevItems.map(item => (item.id === itemId ? { ...item, [name]: value } : item))
         );
     };
 
-    const validate = () => {
-        const newErrors = {};
+    const validateForm = () => {
+        const errors = {};
         let isValid = true;
-
-        if (!maHocPhan.trim()) {
-            newErrors.maHocPhan = 'Vui lòng nhập mã học phần.';
-            isValid = false;
-        }
 
         contentItems.forEach((item, index) => {
             const itemErrors = {};
@@ -50,10 +61,10 @@ export default function CreateDeCuongModal({ isOpen, onClose }) {
                 itemErrors[`ten-${index}`] = 'Vui lòng nhập bộ phận đánh giá.';
                 isValid = false;
             }
-            if (!item.trongSo.trim()) {
+            if (!item.trongSo) {
                 itemErrors[`trongSo-${index}`] = 'Vui lòng nhập trọng số.';
                 isValid = false;
-            } else if (isNaN(parseInt(item.trongSo, 10)) || parseInt(item.trongSo, 10) < 0 || parseInt(item.trongSo, 10) > 100) {
+            } else if (isNaN(Number(item.trongSo)) || Number(item.trongSo) < 0 || Number(item.trongSo) > 100) {
                 itemErrors[`trongSo-${index}`] = 'Trọng số phải là số từ 0 đến 100.';
                 isValid = false;
             }
@@ -61,36 +72,44 @@ export default function CreateDeCuongModal({ isOpen, onClose }) {
                 itemErrors[`hinhThuc-${index}`] = 'Vui lòng nhập hình thức.';
                 isValid = false;
             }
-            Object.assign(newErrors, itemErrors);
+            Object.assign(errors, itemErrors);
         });
+
         return isValid;
     };
-    const handleSubmit =async () => {
-        if (validate()) {
-            const dataToSubmit = contentItems.map(item => ({
-                "hocPhan": { "maHocPhan": maHocPhan },
-                "tenCotDiem": item.ten,
-                "trongSo": parseInt(item.trongSo, 10) || 0,
-                "hinhThuc": item.hinhThuc,
-            }));
-            console.log('Dữ liệu submit (JSON):', JSON.stringify(dataToSubmit, null, 2));
-           await DeCuongChiTietService.create(dataToSubmit)
 
-            onClose(); // Đóng modal sau khi submit (hoặc xử lý xong)
-        } else {
-            console.log('Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.');
+    const handleSubmit = () => {
+        try {
+            if (validateForm()) {
+                const dataToSubmit = contentItems.map(item => ({
+                    hocPhan: { maHocPhan: hocPhanObject.maHocPhan },
+                    tenCotDiem: item.ten,
+                    trongSo: Number(item.trongSo) || 0,
+                    hinhThuc: item.hinhThuc,
+                }));
+                
+                DeCuongChiTietService.updateDeCuong(dataToSubmit, hocPhanObject.id);
+                console.log('Dữ liệu submit (JSON):', JSON.stringify(dataToSubmit, null, 2));
+                alert("edit thanh cong")
+                onClose();
+            } else {
+                console.log('Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.');
+            }
+        } catch (error) {
+            console.error('Đã xảy ra lỗi khi submit dữ liệu:', error);
+
         }
     };
 
     if (!isOpen) return null;
 
     return (
-        <div className="overlay bg-blend-screen modal opacity-100 duration-300" >
+        <div className="overlay bg-blend-screen modal opacity-100 duration-300">
             <div className="modal-dialog opacity-100 duration-300 modal-dialog-lg">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h3 className="modal-title">Tạo đề cương chi tiết</h3>
-                        <button onClick={onClose} type="button" className="btn btn-text btn-circle btn-sm absolute end-3 top-3" >
+                        <h3 className="modal-title">Sửa đề cương chi tiết</h3>
+                        <button onClick={onClose} type="button" className="btn btn-text btn-circle btn-sm absolute end-3 top-3">
                             <span className="icon-[tabler--x] size-4"></span>
                         </button>
                     </div>
@@ -102,15 +121,14 @@ export default function CreateDeCuongModal({ isOpen, onClose }) {
                                 placeholder="Nhập mã học phần"
                                 className="input w-full"
                                 id="input-ma-hp"
-                                value={maHocPhan}
-                                onChange={handleMaHocPhanChange}
+                                value={hocPhanObject.maHocPhan}
+                                readOnly
                             />
                         </div>
 
                         <h3 className="mt-5">Nội dung</h3>
 
                         <div id="content-de-cuong" className="mb-4">
-
                             <div className="w-full grid grid-cols-[3fr_1fr_2fr_auto] gap-2 p-4 border border-gray-300 rounded-t-md">
                                 <div className="font-bold text-center">Bộ phận đánh giá</div>
                                 <div className="font-bold text-center">Trọng số (%)</div>
@@ -185,5 +203,5 @@ export default function CreateDeCuongModal({ isOpen, onClose }) {
                 </div>
             </div>
         </div>
-    )
+    );
 }

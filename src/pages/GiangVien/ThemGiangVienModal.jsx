@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { getListAll } from '@/services/NganhService'; 
-import { createGiangVien } from '@/services/GiangVienService'; 
+import { getListAll } from '@/services/NganhService';
+import { createGiangVien } from '@/services/GiangVienService';
 
 const ThemGiangVienModal = ({ isOpen, onClose, onSave }) => {
   const [users, setUsers] = useState([]);
@@ -14,7 +14,7 @@ const ThemGiangVienModal = ({ isOpen, onClose, onSave }) => {
     khoa: '',
     boMon: '',
     chuyenMon: '',
-    trinhDo: ''
+    trinhDo: '',
   });
 
   useEffect(() => {
@@ -22,7 +22,7 @@ const ThemGiangVienModal = ({ isOpen, onClose, onSave }) => {
       try {
         const [userRes, nganhListData] = await Promise.all([
           fetch('http://localhost:8080/api/v1/user'),
-          getListAll()
+          getListAll().then(res => res.data),
         ]);
         const usersData = await userRes.json();
         setUsers(Array.isArray(usersData) ? usersData : usersData.data || []);
@@ -35,7 +35,7 @@ const ThemGiangVienModal = ({ isOpen, onClose, onSave }) => {
     if (isOpen) fetchOptions();
   }, [isOpen]);
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
     setNewGiangVien(prev => ({ ...prev, [name]: value }));
   };
@@ -52,7 +52,7 @@ const ThemGiangVienModal = ({ isOpen, onClose, onSave }) => {
       const payload = {
         ...newGiangVien,
         namSinh: parseInt(namSinh, 10),
-        userId: parseInt(userId)
+        userId: parseInt(userId),
       };
 
       const data = await createGiangVien(payload);
@@ -67,7 +67,7 @@ const ThemGiangVienModal = ({ isOpen, onClose, onSave }) => {
         khoa: '',
         boMon: '',
         chuyenMon: '',
-        trinhDo: ''
+        trinhDo: '',
       });
       window.location.reload();
     } catch (err) {
@@ -95,7 +95,9 @@ const ThemGiangVienModal = ({ isOpen, onClose, onSave }) => {
             >
               {usersActive.length > 0 ? (
                 <>
-                  <option value="" disabled>Chọn user</option>
+                  <option value="" disabled>
+                    Chọn user
+                  </option>
                   {usersActive.map(user => (
                     <option key={user.id} value={user.id}>
                       {user.username} - {user.email}
@@ -156,18 +158,18 @@ const ThemGiangVienModal = ({ isOpen, onClose, onSave }) => {
             <label className="block font-medium mb-1">Bộ Môn</label>
             <input
               type="text"
-              name="boMon"
-              value={newGiangVien.boMon}
+              name="chuyenMon"
+              value={newGiangVien.chuyenMon}
               onChange={handleChange}
               className="w-full border rounded px-3 py-2"
             />
           </div>
 
           <div>
-            <label className="block font-medium mb-1">Chuyên Môn (Ngành)</label>
+            <label className="block font-medium mb-1">Bộ Môn (Ngành)</label>
             <select
-              name="chuyenMon"
-              value={newGiangVien.chuyenMon}
+              name="boMon"
+              value={newGiangVien.boMon}
               onChange={handleChange}
               className="w-full border rounded px-3 py-2"
             >
@@ -193,10 +195,7 @@ const ThemGiangVienModal = ({ isOpen, onClose, onSave }) => {
         </div>
 
         <div className="mt-6 flex justify-end gap-3">
-          <button
-            className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
-            onClick={onClose}
-          >
+          <button className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400" onClick={onClose}>
             Huỷ
           </button>
           <button

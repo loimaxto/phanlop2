@@ -4,7 +4,7 @@ import KeHoachMoNhomService from '../../services/KeHoachMoNhomService';
 import { toast } from 'react-toastify';
 
 const EditKeHoachModal = ({ isOpen, keHoachMoNhom, onSave, onClose }) => {
-  console.log('EditKeHoachModal props:', { isOpen, keHoachMoNhom, onSave });
+  // console.log('EditKeHoachModal props:', { isOpen, keHoachMoNhom, onSave });
   if (!isOpen || !keHoachMoNhom) return null;
 
   const [formData, setFormData] = useState({
@@ -30,7 +30,7 @@ const EditKeHoachModal = ({ isOpen, keHoachMoNhom, onSave, onClose }) => {
       return;
     }
 
-    console.log('Form data before submission:', formData);
+    // console.log('Form data before submission:', formData);
 
     (async () => {
       const response = await KeHoachMoNhomService.updateKeHoachMoNhom(keHoachMoNhom.id, formData);

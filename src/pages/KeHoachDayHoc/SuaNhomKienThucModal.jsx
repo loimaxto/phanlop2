@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 import KeHoachDayHocService from '../../services/KeHoachDayHocService';
 
 export default function AddNhomKienThucModal({ isOpen, onClose, refresh, nhomKienThuc }) {
-  console.log('nhomKienThuc', nhomKienThuc);
+  // console.log('nhomKienThuc', nhomKienThuc);
   if (!isOpen) return null;
 
   // {
@@ -47,6 +47,12 @@ export default function AddNhomKienThucModal({ isOpen, onClose, refresh, nhomKie
       return;
     }
 
+    //neu soTinChiTuChonToiThieu > tong so tin chi tu chon
+    if (formData.soTinChiTuChonToiThieu > formData.tongSoTinChiTuChon) {
+      toast.error('Số tín chỉ tự chọn tối thiểu không được lớn hơn tổng số tín chỉ tự chọn');
+      return;
+    }
+
     let data = {
       maNhom: formData.maNhom,
       tenNhom: formData.tenNhom,
@@ -69,7 +75,7 @@ export default function AddNhomKienThucModal({ isOpen, onClose, refresh, nhomKie
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-[#00000094]">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-1/2">
+      <div className="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full">
         <h2 className="text-xl font-semibold mb-4">Sửa Nhóm Kiến Thức</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">

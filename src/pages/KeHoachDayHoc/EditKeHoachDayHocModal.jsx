@@ -13,7 +13,6 @@ const EditKeHoachDayHocModal = ({
   listNhomKienThuc,
   listKhoiKienThuc,
 }) => {
-  console.log('keHoachDayHoc', keHoachDayHoc);
   // return null;
   if (!isOpen) return null;
 
