@@ -31,7 +31,7 @@ const GiangVienPage = () => {
   useEffect(() => {
     const fetchNganh = async () => {
       try {
-        const data = await getNganhList();
+        const data = await getNganhList().then(res => res.data);
         setNganhList(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Lỗi khi lấy danh sách ngành:', error);

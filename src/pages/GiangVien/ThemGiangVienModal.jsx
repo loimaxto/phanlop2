@@ -22,7 +22,7 @@ const ThemGiangVienModal = ({ isOpen, onClose, onSave }) => {
       try {
         const [userRes, nganhListData] = await Promise.all([
           fetch('http://localhost:8080/api/v1/user'),
-          getListAll(),
+          getListAll().then(res => res.data),
         ]);
         const usersData = await userRes.json();
         setUsers(Array.isArray(usersData) ? usersData : usersData.data || []);

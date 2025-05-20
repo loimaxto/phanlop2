@@ -13,7 +13,7 @@ const MauinGiangVienModal = ({ show, onClose }) => {
   useEffect(() => {
     const fetchNganhList = async () => {
       try {
-        const data = await getListAll();
+        const data = await getListAll().then(res => res.data);
         setNganhList(data);
         if (data.length > 0) {
           setSelectedNganh(data[0].tenNganh);
