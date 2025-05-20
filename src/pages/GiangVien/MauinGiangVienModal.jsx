@@ -182,6 +182,9 @@ const MauinGiangVienModal = ({ show, onClose }) => {
 
             const totalThisHP =
               (Number(hp.hk1) + Number(hp.hk2) + Number(hp.hk3)) * Number(hp.soTiet);
+
+            row.getCell(14).value = totalThisHP;
+
             totalTietGV += totalThisHP;
 
             applyCellStyle(row);
