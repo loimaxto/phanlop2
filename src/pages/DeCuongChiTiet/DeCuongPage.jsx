@@ -14,7 +14,7 @@ export default function DeCuongPage() {
     useEffect(() => {
 
         fetchHocPhan();
-    }, [isOpenCreate])
+    }, [])
     if (deCuongList == null) return <>Lỗi lấy dữ liệu đề cương</>
 
     const fetchHocPhan = async () => {
@@ -33,9 +33,10 @@ export default function DeCuongPage() {
     const handleCloseEdit = () => {
         setIsOpenEdit(false)
     }
-    const handleCloseCreate = () => {
-        setIsOpenCreate(false)
-    }
+    const handleCloseCreate = async () => {
+        setIsOpenCreate(false);
+        await fetchHocPhan();
+    };
     const handleOpenDetail = (hocPhanObject) => {
         console.log("open")
         setCurrentChoseDeCuong(hocPhanObject)
@@ -46,7 +47,7 @@ export default function DeCuongPage() {
         setIsOpenDetail(false)
         setCurrentChoseDeCuong(null)
     }
-    const handleDeleteDeCuong= async (hocPhanId) => {
+    const handleDeleteDeCuong = async (hocPhanId) => {
         const result = window.confirm('Bạn có chắc chắn xóa?');
         if (result) {
             try {
