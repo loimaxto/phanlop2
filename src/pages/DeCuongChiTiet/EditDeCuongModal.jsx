@@ -61,7 +61,7 @@ export default function EditDeCuongModal({ isOpen, onClose, hocPhanObject }) {
                 itemErrors[`ten-${index}`] = 'Vui lòng nhập bộ phận đánh giá.';
                 isValid = false;
             }
-            if (!item.trongSo.trim()) {
+            if (!item.trongSo) {
                 itemErrors[`trongSo-${index}`] = 'Vui lòng nhập trọng số.';
                 isValid = false;
             } else if (isNaN(Number(item.trongSo)) || Number(item.trongSo) < 0 || Number(item.trongSo) > 100) {

@@ -1,11 +1,16 @@
-import React, { useState } from 'react'; // Import useState
+import React, { useState, useEffect } from 'react'; // Import useState
 import DeCuongChiTietService from '@services/DeCuongChiTietService.js'
 export default function CreateDeCuongModal({ isOpen, onClose }) {
     const [contentItems, setContentItems] = useState([
         { id: Date.now(), ten: '', trongSo: '', hinhThuc: '' }
     ]);
     const [maHocPhan, setMaHocPhan] = useState('');
-
+    useEffect(() => {
+        setContentItems([
+            { id: Date.now(), ten: '', trongSo: '', hinhThuc: '' }
+        ])
+        setMaHocPhan('')
+    }, [isOpen])
     const handleMaHocPhanChange = (event) => {
         setMaHocPhan(event.target.value);
     };
@@ -60,8 +65,8 @@ export default function CreateDeCuongModal({ isOpen, onClose }) {
         });
         return isValid;
     };
-    const handleSubmit = () => {
-         if (validate()) {
+    const handleSubmit =async () => {
+        if (validate()) {
             const dataToSubmit = contentItems.map(item => ({
                 "hocPhan": { "maHocPhan": maHocPhan },
                 "tenCotDiem": item.ten,
@@ -69,10 +74,9 @@ export default function CreateDeCuongModal({ isOpen, onClose }) {
                 "hinhThuc": item.hinhThuc,
             }));
             console.log('Dữ liệu submit (JSON):', JSON.stringify(dataToSubmit, null, 2));
-            DeCuongChiTietService.create(dataToSubmit)
+           await DeCuongChiTietService.create(dataToSubmit)
 
-            // Gọi API submit dữ liệu ở đây (nếu cần)
-            // onClose(); // Đóng modal sau khi submit (hoặc xử lý xong)
+            onClose(); // Đóng modal sau khi submit (hoặc xử lý xong)
         } else {
             console.log('Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.');
         }
