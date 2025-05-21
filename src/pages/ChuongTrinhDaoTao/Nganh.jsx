@@ -62,7 +62,7 @@ function Nganh({ isOpen, onClose }) {
       tenNganh: form.tenNganh.value,
     };
     const response = await updateNganh(updated.id, updated);
-    if (response.statusCode === 201) {
+    if (response.statusCode === 200) {
       toast.success(response?.message || 'Cập nhật ngành thành công!');
       handleCloseEditModal();
       fetchData(currentPage, pageSize);

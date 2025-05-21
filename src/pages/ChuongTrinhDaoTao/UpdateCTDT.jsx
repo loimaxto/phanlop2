@@ -10,14 +10,16 @@ function UpdateCTDT({ id, isOpen, onClose }) {
   const [formData, setFormData] = useState({
     nganhId: '',
     khoaQuanLy: '',
-    loaiHinhDaoTao: '', // đã sửa đúng key
+    loaiHinhDaoTao: '',
     loaiBang: '',
     tongTinChi: '',
     thoiGianDaoTao: '',
     banHanh: '',
     website: '',
     ngonNgu: '',
+    status: false,
   });
+
   const [industries, setIndustries] = useState([]);
 
   const fetchData = async () => {
@@ -38,6 +40,7 @@ function UpdateCTDT({ id, isOpen, onClose }) {
         website: dataThongTinChung.website || '',
         thoiGianDaoTao: dataThongTinChung.thoiGianDaoTao || '',
         banHanh: dataThongTinChung.banHanh || '',
+        status: dataThongTinChung.status || false,
       });
     } catch (error) {
       toast.error('Lỗi khi tải dữ liệu chi tiết!');
@@ -61,7 +64,6 @@ function UpdateCTDT({ id, isOpen, onClose }) {
     try {
       const response = await updateThongTinChung(id, formData);
       const data = response.data;
-
       if (response.statusCode === 200) {
         toast.success('Cập nhật chương trình thành công!');
         setIsEditing(false);
@@ -167,6 +169,26 @@ function UpdateCTDT({ id, isOpen, onClose }) {
               />
             </div>
           ))}
+
+          {/* Status */}
+          <div className="w-80 mb-3 mr-auto">
+            <label className="label-text block mb-2">Trạng thái hoạt động</label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                name="status"
+                checked={formData.status}
+                onChange={e =>
+                  setFormData(prev => ({
+                    ...prev,
+                    status: e.target.checked,
+                  }))
+                }
+                disabled={!isEditing}
+              />
+              <span>{formData.status ? 'Đang hoạt động' : 'Ngưng hoạt động'}</span>
+            </label>
+          </div>
         </div>
 
         {/* Ban hành */}
