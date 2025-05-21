@@ -13,7 +13,6 @@ export default function ThemKeHoachMoNhom() {
     namHoc: '',
     tongSoNhom: '',
     tongSoSinhVien: '',
-    heSo: '',
   });
 
   const handleChange = e => {
@@ -43,7 +42,6 @@ export default function ThemKeHoachMoNhom() {
           namHoc: '',
           tongSoNhom: '',
           tongSoSinhVien: '',
-          heSo: '',
         });
         navigate('/ke-hoach-mo-nhom');
       } catch (error) {
@@ -121,19 +119,6 @@ export default function ThemKeHoachMoNhom() {
             onChange={handleChange}
             className="w-full mt-1 p-2 border rounded"
             min="1"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium">Hệ số</label>
-          <input
-            type="number"
-            name="heSo"
-            step="0.1"
-            value={formData.heSo}
-            onChange={handleChange}
-            className="w-full mt-1 p-2 border rounded"
             required
           />
         </div>

@@ -14,7 +14,6 @@ const EditKeHoachModal = ({ isOpen, keHoachMoNhom, onSave, onClose }) => {
     namHoc: keHoachMoNhom.namHoc,
     tongSoNhom: keHoachMoNhom.tongSoNhom,
     tongSoSinhVien: keHoachMoNhom.tongSoSinhVien,
-    heSo: keHoachMoNhom.heSo,
   });
   const { listHocPhan } = useAppContext();
 
@@ -45,7 +44,6 @@ const EditKeHoachModal = ({ isOpen, keHoachMoNhom, onSave, onClose }) => {
         namHoc: '',
         tongSoNhom: '',
         tongSoSinhVien: '',
-        heSo: '',
       });
       onSave();
     })();
@@ -133,19 +131,6 @@ const EditKeHoachModal = ({ isOpen, keHoachMoNhom, onSave, onClose }) => {
               onChange={handleChange}
               className="w-full mt-1 p-2 border rounded"
               min="1"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium">Hệ số</label>
-            <input
-              type="number"
-              name="heSo"
-              step="0.1"
-              value={formData.heSo}
-              onChange={handleChange}
-              className="w-full mt-1 p-2 border rounded"
               required
             />
           </div>

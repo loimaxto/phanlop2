@@ -458,7 +458,7 @@ export const printKeHoachMoNhom = (
       { content: item.hocPhan.soTietBaiTap, rowSpan: phanCongCount },
       { content: item.hocPhan.soTietThucHanh, rowSpan: phanCongCount },
       { content: item.hocPhan.soTietTongCong, rowSpan: phanCongCount },
-      { content: item.heSo, rowSpan: phanCongCount },
+      { content: item.hocPhan.heSo, rowSpan: phanCongCount },
       { content: item.tongSoNhom, rowSpan: phanCongCount },
       { content: item.soSinhVien1Nhom, rowSpan: phanCongCount },
     ];

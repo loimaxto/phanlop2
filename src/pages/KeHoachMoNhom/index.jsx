@@ -24,7 +24,7 @@ const KeHoachGiangDayPage = () => {
   const [selectedNamHoc, setSelectedNamHoc] = useState('');
   const [keyword, setKeyword] = useState('');
   const [needRefresh, setNeedRefresh] = useState(true);
-  const [keHoachData, setKeHoachData] = useState(keHoachMoNhomData);
+  const [keHoachData, setKeHoachData] = useState([]);
   const [isPrintMenuOpen, setIsPrintMenuOpen] = useState(false);
 
   // Initialize academic year
@@ -403,7 +403,7 @@ const KeHoachGiangDayPage = () => {
                                 {keHoach.hocPhan.soTietTongCong}
                               </td>
                               <td className="p-2 border text-center" rowSpan={rowSpan}>
-                                {keHoach.heSo.toFixed(2)}
+                                {keHoach.hocPhan.heSo}
                               </td>
                               <td className="p-2 border text-center" rowSpan={rowSpan}>
                                 {keHoach.tongSoNhom}
@@ -467,7 +467,9 @@ const KeHoachGiangDayPage = () => {
                         <td className="p-2 border text-center">{keHoach.hocPhan.soTietBaiTap}</td>
                         <td className="p-2 border text-center">{keHoach.hocPhan.soTietThucHanh}</td>
                         <td className="p-2 border text-center">{keHoach.hocPhan.soTietTongCong}</td>
-                        <td className="p-2 border text-center">{keHoach.heSo.toFixed(2)}</td>
+                        <td className="p-2 border text-center">
+                          {keHoach.hocPhan.heSo.toFixed(2)}
+                        </td>
                         <td className="p-2 border text-center">{keHoach.tongSoNhom}</td>
                         <td className="p-2 border text-center">{keHoach.soSinhVien1Nhom}</td>
                         <td className="p-2 border text-center" colSpan="6"></td>

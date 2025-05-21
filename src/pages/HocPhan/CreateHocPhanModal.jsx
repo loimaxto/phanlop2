@@ -8,21 +8,23 @@ export default function CreateHocPhanModal({ isOpen, onClose }) {
   const [tietBaiTap, setTietBaiTap] = useState(0);
   const [soTietLyThuyet, setSoTietLyThuyet] = useState(0);
   const [soTietThucHanh, setSoTietThucHanh] = useState(0);
+  const [heSo, setHeSo] = useState(1);
 
   const [hocPhanTienQuyet, setHocPhanTienQuyet] = useState(null);
   const [maHocPhan, setMaHocPhan] = useState(null);
 
   const handleCreate = async () => {
     const newHocPhan = {
-      "maHocPhan": maHocPhan,
-      "tenHocPhan": tenHocPhan,
-      "soTinChi": parseInt(soTinChi),
-      "soTietLyThuyet": parseInt(soTietLyThuyet),
-      "soTietBaiTap": parseInt(tietBaiTap),
-      "soTietThucHanh": parseInt(soTietThucHanh),
-      "maHocPhanTruoc": hocPhanTienQuyet == '' ? null : hocPhanTienQuyet
+      maHocPhan: maHocPhan,
+      tenHocPhan: tenHocPhan,
+      soTinChi: parseInt(soTinChi),
+      soTietLyThuyet: parseInt(soTietLyThuyet),
+      soTietBaiTap: parseInt(tietBaiTap),
+      soTietThucHanh: parseInt(soTietThucHanh),
+      maHocPhanTruoc: hocPhanTienQuyet == '' ? null : hocPhanTienQuyet,
+      heSo: heSo,
     };
-    console.log(newHocPhan)
+    console.log(newHocPhan);
     try {
       const response = await HocPhanService.createHocPhan(newHocPhan);
 
@@ -32,7 +34,6 @@ export default function CreateHocPhanModal({ isOpen, onClose }) {
         console.log('Học phần đã được tạo:', response);
         onClose();
       }
-
     } catch (error) {
       console.error('Lỗi khi tạo học phần:', error);
     }
@@ -65,7 +66,7 @@ export default function CreateHocPhanModal({ isOpen, onClose }) {
                 className="input"
                 id="input-ma-hp"
                 value={maHocPhan}
-                onChange={(e) => setMaHocPhan(e.target.value)}
+                onChange={e => setMaHocPhan(e.target.value)}
               />
             </div>
             <div className="w-full">
@@ -78,7 +79,7 @@ export default function CreateHocPhanModal({ isOpen, onClose }) {
                 className="input"
                 id="input-ten-hp"
                 value={tenHocPhan}
-                onChange={(e) => setTenHocPhan(e.target.value)}
+                onChange={e => setTenHocPhan(e.target.value)}
               />
             </div>
             <div className="flex flex-row gap-4">
@@ -93,7 +94,7 @@ export default function CreateHocPhanModal({ isOpen, onClose }) {
                     min="0"
                     id="so-tinh-chi"
                     value={soTinChi}
-                    onChange={(e) => setSoTinChi(e.target.value)}
+                    onChange={e => setSoTinChi(e.target.value)}
                   />
                 </div>
               </div>
@@ -108,7 +109,24 @@ export default function CreateHocPhanModal({ isOpen, onClose }) {
                     min="0"
                     id="tiet-bai-tap"
                     value={tietBaiTap}
-                    onChange={(e) => setTietBaiTap(e.target.value)}
+                    onChange={e => setTietBaiTap(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="max-w-32">
+                <label className="label-text" htmlFor="heSo">
+                  Hệ số:
+                </label>
+                <div className="input items-center">
+                  <input
+                    className="text-center"
+                    type="number"
+                    min="0"
+                    max="1"
+                    step={0.1}
+                    id="heSo"
+                    value={heSo}
+                    onChange={e => setHeSo(e.target.value)}
                   />
                 </div>
               </div>
@@ -125,7 +143,7 @@ export default function CreateHocPhanModal({ isOpen, onClose }) {
                     min="0"
                     id="tiet-ly-thuyet"
                     value={soTietLyThuyet}
-                    onChange={(e) => setSoTietLyThuyet(e.target.value)}
+                    onChange={e => setSoTietLyThuyet(e.target.value)}
                   />
                 </div>
               </div>
@@ -140,7 +158,7 @@ export default function CreateHocPhanModal({ isOpen, onClose }) {
                     min="0"
                     id="tiet-thuc-hanh"
                     value={soTietThucHanh}
-                    onChange={(e) => setSoTietThucHanh(e.target.value)}
+                    onChange={e => setSoTietThucHanh(e.target.value)}
                   />
                 </div>
               </div>
@@ -155,7 +173,7 @@ export default function CreateHocPhanModal({ isOpen, onClose }) {
                 className="input"
                 id="input-hp-tien-quyet"
                 value={hocPhanTienQuyet}
-                onChange={(e) => setHocPhanTienQuyet(e.target.value)}
+                onChange={e => setHocPhanTienQuyet(e.target.value)}
               />
             </div>
           </div>
