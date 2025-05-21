@@ -156,20 +156,9 @@ const ThemGiangVienModal = ({ isOpen, onClose, onSave }) => {
 
           <div>
             <label className="block font-medium mb-1">Bộ Môn</label>
-            <input
-              type="text"
+            <select
               name="boMon"
               value={newGiangVien.boMon}
-              onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
-            />
-          </div>
-
-          <div>
-            <label className="block font-medium mb-1">Chuyên Môn (Ngành)</label>
-            <select
-              name="chuyenMon"
-              value={newGiangVien.chuyenMon}
               onChange={handleChange}
               className="w-full border rounded px-3 py-2"
             >
@@ -180,6 +169,17 @@ const ThemGiangVienModal = ({ isOpen, onClose, onSave }) => {
                 </option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label className="block font-medium mb-1">Chuyên Môn (Ngành)</label>
+            <input
+              type="text"
+              name="chuyenMon"
+              value={newGiangVien.chuyenMon}
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2"
+            />
           </div>
 
           <div>
