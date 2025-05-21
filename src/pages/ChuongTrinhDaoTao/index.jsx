@@ -6,7 +6,7 @@ import UpdateCTDT from './UpdateCTDT';
 import XoaCTDT from './XoaCTDT';
 import CTKhung from './CTKhung';
 import { getListThongTinChung } from '@services/ThongTinChungService';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export default function CurriculumPage() {
@@ -14,6 +14,7 @@ export default function CurriculumPage() {
   const [pageSize, setPageSize] = useState(5);
   const [rows, setRows] = useState([]);
   const [meta, setMeta] = useState({ totalPage: 0, totalElement: 0 });
+  const [search, setSearch] = useState('');
 
   const [openCreateCTDT, setOpenCreateCTDT] = useState(false);
   const [showNganhModal, setShowNganhModal] = useState(false);
@@ -23,12 +24,12 @@ export default function CurriculumPage() {
   const [isModalOpenCTKhung, setOpenModalCTKhung] = useState(false);
 
   useEffect(() => {
-    fetchData(currentPage, pageSize);
-  }, [currentPage, pageSize]);
+    fetchData(currentPage, pageSize, search);
+  }, [currentPage, pageSize, search]);
 
-  const fetchData = async (page, size) => {
+  const fetchData = async (page, size, search) => {
     try {
-      const response = await getListThongTinChung({ page, size });
+      const response = await getListThongTinChung({ page, size, search });
       console.log('Get list CTDT: ', response);
       setRows(response.data);
       setMeta(response.metadata);
@@ -67,6 +68,12 @@ export default function CurriculumPage() {
       <div className="flex items-center justify-between mb-4">
         <h1>Danh mục chương trình đào tạo</h1>
         <div className="flex items-center gap-4">
+          <input
+            type="text"
+            placeholder="Tìm kiếm..."
+            className="input input-bordered px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={e => setSearch(e.target.value)}
+          />
           <button
             className="btn btn-soft btn-gradient text-white"
             onClick={() => setShowNganhModal(true)}
@@ -146,7 +153,6 @@ export default function CurriculumPage() {
                       setSelectedCTDTId(row.id);
                       setOpenModalUpdateCTDT(true);
                     }}
-                    disabled={!row.status}
                   >
                     <span className="icon-[tabler--pencil] size-5"></span>
                   </button>
@@ -208,9 +214,6 @@ export default function CurriculumPage() {
           </button>
         </div>
       </div>
-
-      {/* Toast */}
-      <ToastContainer position="top-right" autoClose={3000} />
 
       {/* Modals */}
       <CreateCurriculumModal isOpen={openCreateCTDT} onClose={() => setOpenCreateCTDT(false)} />

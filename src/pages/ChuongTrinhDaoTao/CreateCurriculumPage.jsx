@@ -23,6 +23,18 @@ export default function CreateCurriculumModal({ isOpen, onClose }) {
   useEffect(() => {
     if (isOpen) {
       fetchData();
+
+      setFormData({
+        nganhId: '',
+        khoaQuanLy: '',
+        loaiHinhDaoTao: '',
+        loaiBang: '',
+        tongTinChi: '',
+        thoiGianDaoTao: '',
+        banHanh: '',
+        website: '',
+        ngonNgu: '',
+      });
     }
   }, [isOpen]);
 
