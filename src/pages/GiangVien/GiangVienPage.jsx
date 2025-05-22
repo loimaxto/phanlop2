@@ -14,6 +14,8 @@ import {
   getGiangVienByKhoa,
   deleteGiangVien,
 } from '@/services/giangVienService';
+import { importGiangVienFromExcel } from '../../services/excel-service';
+import { toast } from 'react-toastify';
 
 const GiangVienPage = () => {
   const [giangVienList, setGiangVienList] = useState([]);
@@ -27,6 +29,7 @@ const GiangVienPage = () => {
   const [selectedKhoa, setSelectedKhoa] = useState('1');
   const [searchText, setSearchText] = useState('');
   const [nganhList, setNganhList] = useState([]);
+  const [needRefresh, setNeedRefresh] = useState(true);
 
   useEffect(() => {
     const fetchNganh = async () => {
@@ -79,13 +82,16 @@ const GiangVienPage = () => {
         );
 
         setGiangVienList(dataWithTiet);
+        if (needRefresh) {
+          setNeedRefresh(false);
+        }
       } catch (error) {
         console.error('❌ Lỗi khi lấy danh sách giảng viên:', error);
       }
     }, 500);
 
     return () => clearTimeout(timeout);
-  }, [searchText, selectedKhoa]);
+  }, [searchText, selectedKhoa, needRefresh]);
 
   const handleView = (e, gv) => {
     e.stopPropagation();
@@ -122,6 +128,18 @@ const GiangVienPage = () => {
     setIsAddModalOpen(false);
   };
 
+  const handleBtnImportChange = async e => {
+    const file = e.target.files[0];
+    const result = await importGiangVienFromExcel(file);
+    if (result.success) {
+      toast.success('Import thành công');
+    } else {
+      toast.warn('Có lỗi xảy ra, bỏ qua những dòng gây lỗi!');
+      console.error('Import excel errors:', result.errors);
+    }
+    setNeedRefresh(true);
+  };
+
   return (
     <div className="p-6 space-y-6">
       {/* Toolbar */}
@@ -133,6 +151,22 @@ const GiangVienPage = () => {
           <button className="btn btn-accent gap-2" onClick={() => setIsExportModalOpen(true)}>
             <MdImportExport /> Export mẫu in
           </button>
+          <div className="relative inline-block">
+            <label
+              htmlFor="excel-import"
+              className="flex items-center gap-2 px-4 py-2 text-white bg-green-600 rounded-lg shadow-md cursor-pointer hover:bg-green-700 transition-colors duration-200"
+            >
+              <MdImportExport className="w-5 h-5" />
+              <span>Import Excel</span>
+            </label>
+            <input
+              id="excel-import"
+              type="file"
+              accept=".xlsx, .xls"
+              className="absolute w-0 h-0 opacity-0"
+              onChange={handleBtnImportChange}
+            />
+          </div>
         </div>
 
         <div className="flex flex-col md:flex-row gap-3 w-full lg:w-1/2">

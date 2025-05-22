@@ -6,16 +6,16 @@ const UserTable = ({ users, onEdit, onDelete }) => {
   const [searchKeyword, setSearchKeyword] = useState('');
 
   // Filter users based on keyword
-  const filteredUsers = users.filter(user =>
-    [user.email || '', user.username || '', user.role || '', user.soDienThoai || ''].some(field =>
-      field.toLowerCase().includes(searchKeyword.toLowerCase())
-    )
-  );
+  // const filteredUsers = users.filter(user =>
+  //   [user.email || '', user.username || '', user.role || '', user.soDienThoai || ''].some(field =>
+  //     field.toLowerCase().includes(searchKeyword.toLowerCase())
+  //   )
+  // );
 
   return (
     <div className="space-y-4">
       {/* Search Input */}
-      <div className="flex justify-start items-center mb-4">
+      {/* <div className="flex justify-start items-center mb-4">
         <input
           type="text"
           placeholder="Tìm kiếm theo email, tên, vai trò, SĐT..."
@@ -23,7 +23,7 @@ const UserTable = ({ users, onEdit, onDelete }) => {
           onChange={e => setSearchKeyword(e.target.value)}
           className="w-full max-w-xs px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
         />
-      </div>
+      </div> */}
 
       {/* Table */}
       <div className="overflow-x-auto">
@@ -51,7 +51,7 @@ const UserTable = ({ users, onEdit, onDelete }) => {
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.map(u => (
+            {users.map(u => (
               <tr key={u.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-4 py-3 text-sm text-gray-600 border-b border-gray-200">
                   {u.email}
@@ -96,7 +96,7 @@ const UserTable = ({ users, onEdit, onDelete }) => {
                 </td>
               </tr>
             ))}
-            {filteredUsers.length === 0 && (
+            {users.length === 0 && (
               <tr>
                 <td
                   colSpan="6"
