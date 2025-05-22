@@ -107,14 +107,14 @@ function CTKhung({ id, isOpen, onClose }) {
 
     khoi.nhomKienThucChuongOfKhoiKienThuc.forEach((nhom, nhomIndex) => {
       subBatBuoc += nhom.soTinChiBatBuoc;
-      subTuChon += nhom.soTinChiTuChon;
+      subTuChon += nhom.soTinChiToiThieu;
 
       if (nhom.tichLuy) {
         totalTichLuy += nhom.soTinChiBatBuoc + nhom.soTinChiTuChon;
       }
 
       totalBatBuoc += nhom.soTinChiBatBuoc;
-      totalTuChon += nhom.soTinChiTuChon;
+      totalTuChon += nhom.soTinChiToiThieu;
 
       renderedRows.push(
         <tr key={`nhom-${khoiIndex}-${nhomIndex}`}>
@@ -134,7 +134,7 @@ function CTKhung({ id, isOpen, onClose }) {
     renderedRows.push(
       <tr key={`khoi-total-${khoiIndex}`} className="bg-yellow-100 font-medium">
         <td className="border px-4 py-2 text-right">Tổng khối</td>
-        <td className="border px-4 py-2 text-center">{subTuChon}</td>
+        <td className="border px-4 py-2 text-center">{subTuChon} (Tối thiểu)</td>
         <td className="border px-4 py-2 text-center">{subBatBuoc}</td>
         <td className="border px-4 py-2"></td>
       </tr>
