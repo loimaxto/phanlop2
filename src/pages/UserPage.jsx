@@ -2,7 +2,13 @@ import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FaPlus } from 'react-icons/fa';
-import { getAllUsers, createUser, updateUser, deleteUser } from '@services/userService';
+import {
+  getAllUsers,
+  findUsersByKeyword,
+  createUser,
+  updateUser,
+  deleteUser,
+} from '@services/userService';
 import UserTable from '@components/UserTable';
 import UserFormModal from '@components/UserFormModal';
 
@@ -11,11 +17,12 @@ const UserPage = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState('');
 
-  const fetchUsers = async () => {
+  const fetchUsers = async searchKeyword => {
     setIsLoading(true);
     try {
-      const response = await getAllUsers();
+      const response = await findUsersByKeyword(searchKeyword);
       if (response.success) {
         setUsers(response.data);
       } else {
@@ -29,8 +36,8 @@ const UserPage = () => {
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    fetchUsers(searchKeyword);
+  }, [searchKeyword]);
 
   const handleCreate = async user => {
     const response = await createUser(user);
@@ -73,7 +80,16 @@ const UserPage = () => {
             Thêm người dùng
           </button>
         </div>
-
+        {/* Search Input */}
+        <div className="flex justify-start items-center mb-4">
+          <input
+            type="text"
+            placeholder="Tìm kiếm theo email, tên, vai trò, SĐT..."
+            value={searchKeyword}
+            onChange={e => setSearchKeyword(e.target.value)}
+            className="w-full max-w-xs px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+          />
+        </div>
         {isLoading ? (
           <div className="text-center py-4">
             <svg

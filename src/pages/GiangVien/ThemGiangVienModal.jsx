@@ -172,7 +172,7 @@ const ThemGiangVienModal = ({ isOpen, onClose, onSave }) => {
           </div>
 
           <div>
-            <label className="block font-medium mb-1">Chuyên Môn (Ngành)</label>
+            <label className="block font-medium mb-1">Chuyên Môn</label>
             <input
               type="text"
               name="chuyenMon"

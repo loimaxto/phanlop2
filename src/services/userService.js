@@ -25,6 +25,21 @@ export const getAllUsers = async () => {
   }
 };
 
+export const findUsersByKeyword = async keyword => {
+  try {
+    console.log(keyword);
+    const response = await axios.get(API_URL, {
+      params: {
+        keyword,
+      },
+    });
+    return { success: true, data: response.data };
+  } catch (error) {
+    toast.error('Lỗi khi lấy danh sách người dùng');
+    return { success: false, error };
+  }
+};
+
 export const createUser = async user => {
   const validationError = validateUser(user, true);
   if (validationError) {
