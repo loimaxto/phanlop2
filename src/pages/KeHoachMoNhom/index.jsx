@@ -6,6 +6,7 @@ import EditKeHoachModal from './EditKeHoachModal';
 import AddPhanCongModal from './AddPhanCongModal';
 import EditPhanCongModal from './EditPhanCongModal';
 import KeHoachMoNhomService from '../../services/KeHoachMoNhomService';
+import { getListAll } from '../../services/NganhService';
 import { printKeHoachMoNhom, printKeHoachMoNhomTongHop } from '../../services/print-service';
 import { NavLink } from 'react-router';
 import { toast } from 'react-toastify';
@@ -26,18 +27,26 @@ const KeHoachGiangDayPage = () => {
   const [needRefresh, setNeedRefresh] = useState(true);
   const [keHoachData, setKeHoachData] = useState([]);
   const [isPrintMenuOpen, setIsPrintMenuOpen] = useState(false);
+  const [selectedMaNganh, setSelectedMaNganh] = useState('');
+  const [listNganh, setListNganh] = useState([]);
 
   // Initialize academic year
   useEffect(() => {
     const currentYear = new Date().getFullYear();
     setSelectedNamHoc(`${currentYear - 1}-${currentYear}`);
+
+    (async () => {
+      const response = await getListAll();
+      const data = response.data || [];
+      setListNganh(data);
+    })();
   }, []);
 
   // Debounced search function
   const debouncedSearch = useCallback(
-    debounce(async (keyword, namHoc) => {
+    debounce(async (keyword, namHoc, maNganh) => {
       try {
-        const data = await KeHoachMoNhomService.searchKeHoachMoNhom(keyword, namHoc);
+        const data = await KeHoachMoNhomService.searchKeHoachMoNhom(keyword, namHoc, maNganh);
         setKeHoachData(data);
       } catch (error) {
         toast.error('Lỗi khi tìm kiếm kế hoạch mở nhóm');
@@ -49,12 +58,12 @@ const KeHoachGiangDayPage = () => {
   // Fetch data when keyword, namHoc, or needRefresh changes
   useEffect(() => {
     if (selectedNamHoc) {
-      debouncedSearch(keyword, selectedNamHoc);
+      debouncedSearch(keyword, selectedNamHoc, selectedMaNganh);
       if (needRefresh) {
         setNeedRefresh(false);
       }
     }
-  }, [keyword, selectedNamHoc, needRefresh, debouncedSearch]);
+  }, [keyword, selectedNamHoc, selectedMaNganh, needRefresh, debouncedSearch]);
 
   // Handle delete ke hoach
   const handleDeleteKeHoachMoNhom = index => {
@@ -203,6 +212,18 @@ const KeHoachGiangDayPage = () => {
                 </option>
               ))}
             </select>
+
+            <select
+              value={selectedMaNganh}
+              onChange={e => setSelectedMaNganh(e.target.value)}
+              className="border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {listNganh.map(nganh => (
+                <option key={nganh.maNganh} value={nganh.maNganh}>
+                  {nganh.tenNganh}
+                </option>
+              ))}
+            </select>
             <div className="relative inline-block text-left">
               <button
                 className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md flex items-center transition-colors duration-200"
@@ -224,6 +245,7 @@ const KeHoachGiangDayPage = () => {
                 </svg>
                 <span className="ml-2">In</span>
               </button>
+
               {isPrintMenuOpen && (
                 <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
                   <button
@@ -264,7 +286,7 @@ const KeHoachGiangDayPage = () => {
                   Số TC
                 </th>
                 <th className="p-2 border text-center" rowSpan="2">
-                  Khoa
+                  Ngành
                 </th>
                 <th className="p-2 border text-center" colSpan="4">
                   Số tiết
@@ -467,9 +489,7 @@ const KeHoachGiangDayPage = () => {
                         <td className="p-2 border text-center">{keHoach.hocPhan.soTietBaiTap}</td>
                         <td className="p-2 border text-center">{keHoach.hocPhan.soTietThucHanh}</td>
                         <td className="p-2 border text-center">{keHoach.hocPhan.soTietTongCong}</td>
-                        <td className="p-2 border text-center">
-                          {keHoach.hocPhan.heSo.toFixed(2)}
-                        </td>
+                        <td className="p-2 border text-center">{keHoach.hocPhan.heSo}</td>
                         <td className="p-2 border text-center">{keHoach.tongSoNhom}</td>
                         <td className="p-2 border text-center">{keHoach.soSinhVien1Nhom}</td>
                         <td className="p-2 border text-center" colSpan="6"></td>

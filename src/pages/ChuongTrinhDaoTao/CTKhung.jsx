@@ -78,6 +78,9 @@ function CTKhung({ id, isOpen, onClose }) {
           </div>
 
           <div className="text-right mt-4">
+            <NavLink className="btn btn-primary me-4" to={`/ctdt/${id}`}>
+              Chỉnh sửa
+            </NavLink>
             <button className="btn btn-outline" onClick={onClose}>
               Đóng
             </button>

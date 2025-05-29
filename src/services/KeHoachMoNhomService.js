@@ -80,12 +80,13 @@ const createPhanCong = async data => {
   }
 };
 
-const searchKeHoachMoNhom = async (keyword, namHoc) => {
+const searchKeHoachMoNhom = async (keyword, namHoc, maNganh = '') => {
   try {
     const response = await axios.get(`${API_BASE_URL}/api/v1/ke-hoach-mo-nhom`, {
       params: {
-        keyword: keyword,
-        namHoc: namHoc,
+        keyword: keyword || null,
+        namHoc: namHoc || null,
+        maNganh: maNganh || null,
       },
     });
     return response.data;

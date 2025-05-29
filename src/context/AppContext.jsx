@@ -10,6 +10,7 @@ export function AppProvider({ children }) {
   const [listGiangVien, setListGiangVien] = useState([]);
   const [listNhomKienThuc, setListNhomKienThuc] = useState([]);
   const [listKhoiKienThuc, setListKhoiKienThuc] = useState([]);
+  // const [listNganh, setListNganh] = useState([]);
 
   const exportValues = {
     listHocPhan,
@@ -28,6 +29,7 @@ export function AppProvider({ children }) {
       await fetchGiangVienData();
       await fetchNhomKienThucData();
       await fetchKhoiKienThucData();
+      // await fetchNganhData();
     })();
   }, []);
 
